@@ -5,8 +5,6 @@ ADZE is a design architecture for a global decentralized search engine.  It inte
 
 The internet is currently powered by ads. We want to replace ad-powered networks with the ADZE network, in part so that future users of the web will remember what was almost lost. 
 
-In addition to enabling a decentralized search engine, the ADZE network **ends up creating  a decentralized version of the internet archive, solving the link rot problem.**
-
 
 ## Why? Search Algorithms Encode Moralities
 
@@ -86,12 +84,8 @@ Why run an ADZE node if nobody else does?
 
 **Because searching through your own browser’s history is a terrible experience.**  You can generally only search by title. By running all your browsing activity through a proxy which stores copies of all retrieved documents, you can **begin to search your own browsing history using full text search.**
 
-And, if everyone is storing copies of every page they browse, we end up creating** a distributed version of the internet archive. ** Instead of relying on a centralized implementation - which needs a stream of donations and can be attacked both physically and legally, we can have a decentralized version of the internet archive.  Special url-based metaindices can facilitate searches for historical versions of webpages. 
-
-Storage space for local users may be a concern, especially for heavy browsers. Removing pictures is always doable, but so is pruning your local database. If you wish to cooperate with the distributed archive, you might consult a service that tells you which pages hurt the archive the least by their removal.  If you’re the only one with a copy of a page, you might decide to keep or drop it depending on your own beliefs about its relative value.
+[webcorder tools](https://webrecorder.net/tools)  already exists, but storage space for local users may be a concern. The only thing ADZE needs to store is just the text of web pages, so that they can be indexed.
 
 ## How do I use this?
 
 So far this is just an idea. I’ll post links to implementations here as I get started on them. There could be many different implementations, and i’ll link to any that i’m aware of, as they are created. 
-
-The first step is simple for anyone tech savvy: set up a local proxy server and have it store copies of all the HTML documents it retrieves.  Then have your local web browser run through that proxy. We migiht start with a hacked version of the [webcorder tools](https://webrecorder.net/tools) - but these tools are trying to preserve the entire version of a webpage, and all we really need to preseve is the text data so that we can index it.
