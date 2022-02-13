@@ -88,12 +88,10 @@ Why run an ADZE node if nobody else does?
 
 And, if everyone is storing copies of every page they browse, we end up creating** a distributed version of the internet archive. ** Instead of relying on a centralized implementation - which needs a stream of donations and can be attacked both physically and legally, we can have a decentralized version of the internet archive.  Special url-based metaindices can facilitate searches for historical versions of webpages. 
 
-Storage space for local users may be a concern, especially for heavy browsers. Removing pictures is always doable, but so is pruning your local database. If you wish to cooperate with the distributed archive, you might consult a service that tells you which pages hurt the archive the least by their removal.  If you’re the only one with a copy of a page, you might decide to keep or drop it depending on your own beliefs about its relative value. ** \
-**
-
+Storage space for local users may be a concern, especially for heavy browsers. Removing pictures is always doable, but so is pruning your local database. If you wish to cooperate with the distributed archive, you might consult a service that tells you which pages hurt the archive the least by their removal.  If you’re the only one with a copy of a page, you might decide to keep or drop it depending on your own beliefs about its relative value.
 
 ## How do I use this?
 
-So far this is just an idea. I’ll post links to implementations here as I get started on them. There could be many different implementations, and i’ll link to any that i’m aware of, as they are created.
+So far this is just an idea. I’ll post links to implementations here as I get started on them. There could be many different implementations, and i’ll link to any that i’m aware of, as they are created. 
 
-The first step is reallyreal simple for anyone tech savvy: set up a local proxy server and have it store copies of all the HTML documents it retrieves.  Then have your local web browser run through that proxy.
+The first step is simple for anyone tech savvy: set up a local proxy server and have it store copies of all the HTML documents it retrieves.  Then have your local web browser run through that proxy. We migiht start with a hacked version of the [webcorder tools](https://webrecorder.net/tools) - but these tools are trying to preserve the entire version of a webpage, and all we really need to preseve is the text data so that we can index it.
