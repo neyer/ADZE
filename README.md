@@ -1,7 +1,7 @@
 # ADZE: Aggressively Decentralized Search Engine
 
 
-ADZE is a design architecture for a global decentralized search engine.  It intends to solve similar problems as commercial search engines, but without any large company controlling the system. Businesses will participate on the ADZE network, but they will do so as competing participants in an** ecosystem of digital sovereigns.**
+ADZE is a design architecture for a global decentralized search engine.  It intends to solve similar problems as commercial search engines, but without any large company controlling the system. Businesses will participate on the ADZE network, but they will do so as competing participants in an **ecosystem of digital sovereigns.**
 
 The internet is currently powered by ads. We want to replace ad-powered networks with the ADZE network, in part so that future users of the web will remember what was almost lost. 
 
@@ -26,7 +26,6 @@ Yes, **this is likely going to be much too complex for most users**. If you cann
 ADZE users will interact with local ranking engines that decide which results their owners are likely to find relevant, by algorithmically deciding:
 
 
-
 * **which remote indices they will consult**, and 
 * **how to combine and rank the results from multiple indices** into locally visible results
 
@@ -41,15 +40,16 @@ The ADZE network will consist of a very large number of different actors with di
 Crushing all indices into one index to rule them all robs us of the true benefits of diversity: we aren’t going to agree, and that’s OK! ADZE maintains very large numbers of separate indices and encourages the creation of specialized indices.
 
 
-## How? Large Numbers of Local Crawlers + Indexers
+## How? Invert the Search Paradigm
+How we get there includes two parts: the grand final vision, and the inital first steps of getting there.
 
-
+### Grand Vision
 The ADZE network will consist of nodes which run:
 
 
 * A local** HTTP proxy server** which stores copies of all documents that pass through it. These documents will be stored in a **document history. **This proxy server takes the place of **centralized crawlers**. By recording which links a user _actually_ clicked, **ADZE can use better signals of relevance** than mindless bots which follow all links equally.
 * A local **indexing server** which builds indices of all stored documents. 
-* A local **ranking server **which encodes the **users’ personal values**, both** filtering irrelevant results during indexing**, and **combining the results of multiple indices **for user’s searches
+* A local **ranking server **which encodes the **users’ personal values**, both **filtering irrelevant results during indexing**, and **combining the results of multiple indices **for user’s searches
 * A local **query server **would handle user search requests, by combining results from the **local index, **plus a list of remote indices
 
 **Every single component of this system must be open source and interchangeable.  **If people can’t swap these components out according to their own values, then the vision of a free, open web is lost.
@@ -64,7 +64,28 @@ Users will modify their ranking algorithms to weed out indices run by people the
 
 Additionally, I can tell my local ranking engine “this site sucks, I don't want you to suggest it again.” If I spend long hours at some website  because it frightens and angers me, the existing ranking engines prioritize it because it looks like engagement.  ADZE allows me to say ‘this source is awful and it should be removed from my life.  
 
+ 
+### Initial Start: V1.0
 
+So how do we get started here?   This project will be insanely huge, right?  If we are successful, yes. But we can start really small, and build up.   We can do this by *inverting* the typical search engine pattern. Typical search engines work as follows.
+
+*   Crawl the **entire web**, downloading a copy of every single document. That's step one, and it makes competition from new entrants damn near impossible.
+*   Scan all the documents and build an index mapping words and phrases to documents which contain them
+*   Engage in some ranking process which assigns scores to pages, saying 'how good' they are
+*   Finally, serve the results of your index+ranking process
+
+The web is _so big_ right now that crawling and indexing all of it is impossible for amatuers, and probably even for an extremeley well funded new-comer.   Fortunatey, we can take the opposite approach: instead of starting with blind crawlers, downloading and indexing _everything_ and then ranking it, to return 'only the good stuff', we can be smarter. We can use the massive size of the web, and the intelligence and values of the people using ADZE, to our advantage.  If individual ADZE participants share content they think is really good, we can **limit our indices to stuff people actually like.**
+
+This means we can start off, not as a 'general search engine', but as **a tool for users to share the best stuff they find on the web, with their friends.**  We don't compete with the wal-mart of the web by trying to build a different store which has everything, but the shelves are in whatever order you want them. We compete by creating a goofy eclectic botique full of fun weirdos, which at first is nothint but a collection of weridos and their shiny objects. Then we add on the ability for users to re-arrange the store how ever they want. Then, we then gradually expands its inventory.
+
+So Version 1 of ADZE can consist of only a browser plugin, and some content hosted on static storage places like s3 or gcs
+
+* people can use the browser plugin to 'adze' stuff to their own lists, or view things their friends have 'adzed'
+* the plugin can be configured with credentials (think AWS or Azure or GCP credentails) and a path to a static file serving system (S3, GCS , Azure blob storage) for publishing their personal indices to a publicly accessible location on the web 
+* people can then use the browser plugin to 'adze' their friends' metaindices, and then see the things their friends have added or marked as favorites
+* an 'initial metaindex' where people can go to register their azure index in a publicly accessible
+
+When version 1 is completed, we should have a network of people finding and sharing _good_ content, which they do by 'adzing' it to their personal lists. These lists are published to accessible locations on the web, and can be shared with friends. 
 
 ## Base Layer + Incentives 
 
@@ -78,14 +99,8 @@ For users unconnected to lightning, It’s likely the case that **simply owning 
 This** means every single aspect of the ADZE stack** can, and will be, the **subject of intense decentralized competition **to build the best component, for users of a particular niche.   **The only shared vision that will unite users of the ADZE network** is that **people must be free to choose their own way.**
 
 
-## How to crack the network first mover problem?
-
-Why run an ADZE node if nobody else does?
-
-**Because searching through your own browser’s history is a terrible experience.**  You can generally only search by title. By running all your browsing activity through a proxy which stores copies of all retrieved documents, you can **begin to search your own browsing history using full text search.**
-
-[webcorder tools](https://webrecorder.net/tools)  already exists, but storage space for local users may be a concern. The only thing ADZE needs to store is just the text of web pages, so that they can be indexed.
-
 ## How do I use this?
 
-So far this is just an idea. I’ll post links to implementations here as I get started on them. There could be many different implementations, and i’ll link to any that i’m aware of, as they are created. 
+So far this is just an idea, and a roadmap for step 1. 
+
+I’ll post links to implementations here as I get started on them. There could be many different implementations, and i’ll link to any that i’m aware of, as they are created. 
