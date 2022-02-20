@@ -1,4 +1,5 @@
 # ADZE: Aggressively Decentralized Search Engine
+#### Or: ADZE: Asynchronous Digital Sharing Environment
 
 
 ADZE is a design architecture for a global decentralized search engine.  It intends to solve similar problems as commercial search engines, but without any large company controlling the system. Businesses will participate on the ADZE network, but they will do so as competing participants in an **ecosystem of digital sovereigns.**
