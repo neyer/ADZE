@@ -47,7 +47,7 @@ How we get there includes two parts: the grand final vision, and the inital firs
 The ADZE network will consist of nodes which run:
 
 
-* A local** HTTP proxy server** which stores copies of all documents that pass through it. These documents will be stored in a **document history. **This proxy server takes the place of **centralized crawlers**. By recording which links a user _actually_ clicked, **ADZE can use better signals of relevance** than mindless bots which follow all links equally.
+* A local **browser plugin**  which lets users 'adze' content they enjoy. This content is compiled into a local list of documents. Can **ADZE can use better signals of relevance** than mindless bots which follow all links equally.
 * A local **indexing server** which builds indices of all stored documents. 
 * A local **ranking server **which encodes the **users’ personal values**, both **filtering irrelevant results during indexing**, and **combining the results of multiple indices **for user’s searches
 * A local **query server **would handle user search requests, by combining results from the **local index, **plus a list of remote indices
