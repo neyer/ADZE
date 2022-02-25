@@ -19,15 +19,16 @@
 // experiment easily with all kinds of rankers. People can use ML locally to
 // figure out which remote ranking options they like the best.
 
-// Since all content that's added is added _by some person_, we can filter spam 
+// Since all content that's adzed is adzed _by some person_, we can filter spam 
 // just by removing those spammy peers from our own manifests.  And those spam
 // user lists can ALSO be published as content on ADZE. Of course, we'll
 // differ in our judgement there, but that's the whole point of ADZE. 
 
 // When all content is tied to specific identiies, and we can filter out those
-// identies that don't align with our values, we can all use the web in ways
-// that align with our own personal values, without trying to contorl or censor
-// each other.  You'd have to censor the entire web to censor ADZE.
+// identities whose values don't align with our values. That way, we can all 
+// use the web in ways that align with our own personal values, without 
+// trying to contorl or censor each other.  You'd have to censor the entire web
+// to censor ADZE.
 
 message Manifest {
   optional Meta meta = 1;
