@@ -1,13 +1,13 @@
-// ADZE core concept representations standard representation formats for:
+// ADZE core concept representations standard representation formats for
 // peers and content scores.
-//  all timestamps are 64 bit ints, representing milliseconds since unix epoch
+// All timestamps are 64 bit ints, representing milliseconds since unix epoch.
 
 // Everything roles up into this single object, the Manifest.  An ADZE manifest
 // should contain all the data necessary to do local ranking of content.  All
 // the content i adze to my list ends up in my manifest. I can publish my 
 // manifest for anyone to consume it. 
 
-// I can also add other adze users' manifests. The ADZE client (browser plugin
+// I can also adze other adze users' manifests. The ADZE client (browser plugin
 // or otherwise) can download all of my peer's manifests, and show me content
 // my peers like. We can add in recursion if we want as well: my client
 // might decide to 'follow' peers lists several hops out.
@@ -15,12 +15,19 @@
 // Once there's enough content on here, we can start experimenting with ranking
 // options. People can rank the content however they want. Some might sort by 
 // new, others might build ML models, etc.  Those custom rankings and sort
-// orders can themselves be represnted by public manifests, so people can
-// experiment easily.
+// orders can themselves be represented by public manifests, so people can
+// experiment easily with all kinds of rankers. People can use ML locally to
+// figure out which remote ranking options they like the best.
 
 // Since all content that's added is added _by some person_, we can filter spam 
-// just by not adding those spammy peers to our own manifests. Of course, we'll
+// just by removing those spammy peers from our own manifests.  And those spam
+// user lists can ALSO be published as content on ADZE. Of course, we'll
 // differ in our judgement there, but that's the whole point of ADZE. 
+
+// When all content is tied to specific identiies, and we can filter out those
+// identies that don't align with our values, we can all use the web in ways
+// that align with our own personal values, without trying to contorl or censor
+// each other.  You'd have to censor the entire web to censor ADZE.
 
 message Manifest {
   optional Meta meta = 1;
