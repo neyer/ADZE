@@ -1,0 +1,56 @@
+// ADZE core concept representations
+// standard representation formats for:
+// * peers
+// * content scores
+// all timestamps are 64 bit integers
+
+// Everything roles up util this single object, the Manifest
+// An ADZE manifest shoudl contain all the data necessary to do local ranking of content
+// So all the content i adze to my list ends up in a manifest
+// I can publish my manifest for anyone to consume it
+
+// I can also add other adze users' manifests. The ADZE client (browser plugin or otherwise) can download
+// all of my peer's manifests, and show my content other people like. We can add in recursion if we want as well:
+//  my client might decide to 'follow' peers lists several hops out.
+
+message Manifest {
+  optional Meta meta = 1;
+  optional ManifestContent content = 2;
+}
+
+// Maybe other stuff will eventually go here
+// but for now, just these two
+message ManifestContent {
+  repeated Peer peers = 1;
+  repeated ContentScore scores = 2;
+}
+
+
+message Meta {
+  optional Peer owner = 1; // who creates this manifest?
+  optional int64 timestamp = 2;
+  // todo: add a signature showing that yes this person created this 
+ // for now you'd manage this just by only adding the manifest urls of people you trust
+}
+
+message Peer {
+  optional string handle = 1; // nothing enforces global uniqueness here
+  // but with enough ADZE users it would be possible for your machine to resolve a name
+  // i.e. 'what's the url that most of my peers think this name is called'
+
+  // We can represent the remote peer's manifests as pieces of content with scores
+  // this way a person can put up multiple manifests of varying quality
+  // and adze users can rank different indices by the same peer as being of different quality
+  repeated ContentScore peer_manifests = 2;
+}
+
+// A single score given to a single piece of content, at a single time
+message ContentScore {
+  required string url = 1;
+  optional float score = 2;
+  optional int64 timestamp = 3;
+  // eventually we can add other bits of metadata here
+  // i.e. peers can tag content as 'kid safe', 'in the english langugae', etc
+}
+
+
