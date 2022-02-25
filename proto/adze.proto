@@ -2,7 +2,7 @@
 // standard representation formats for:
 // * peers
 // * content scores
-// all timestamps are 64 bit integers
+// all timestamps are 64 bit integers, representing milliseconds since unix epoch
 
 // Everything roles up util this single object, the Manifest
 // An ADZE manifest shoudl contain all the data necessary to do local ranking of content
