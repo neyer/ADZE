@@ -1,0 +1,22 @@
+{
+  "name": "ADZE",
+  "version": "0.1",
+  "manifest_version": 3,
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "24": "images/icon24.png",
+      "32": "images/icon32.png"
+    },
+    "default_title" : "Click Me"
+  },
+  "permissions": [
+    "activeTab", 
+    "scripting",
+    "storage"
+  ],
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  }
+}

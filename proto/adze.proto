@@ -1,3 +1,4 @@
+syntax = "proto3";
 // ADZE core concept representations standard representation formats for
 // peers and content scores.
 // All timestamps are 64 bit ints, representing milliseconds since unix epoch.
@@ -38,7 +39,7 @@ message Manifest {
 // Maybe other stuff will eventually go here but for now, just these two
 message ManifestContent { 
   repeated Peer peers = 1;
-  repeated ContentScore scores  2;
+  repeated ContentScore scores = 2;
 }
 
 
@@ -64,7 +65,7 @@ message Peer {
 
 // A single score given to a single piece of content, at a single time
 message ContentScore { 
-  required string url = 1;
+  optional string url = 1;
   optional float score = 2;
   optional int64 timestamp = 3;
   // eventually we can add other bits of metadata here i.e. peers can tag
