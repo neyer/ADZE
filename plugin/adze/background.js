@@ -7,11 +7,17 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("Got a message!");
   console.log(request);
-  
-  if (request.adze && request.adze.addDocument) {
+  if (typeof request.adze === 'undefined') {
+    return;
+  }
+  if (request.adze.addDocument) {
     addDocToList(request.adze.addDocument);
+    return;
+  }
+  if (request.adze.removeDocument) {
+    removeDocFromList(request.adze.removeDocument);
+    return;
   }
 
 });
@@ -23,7 +29,25 @@ function addDocToList(doc) {
     manifest.content.sites.push(doc);
     manifestStorage.set(manifest);
   });
+}
 
+function makeManifestWithoutDoc(oldManifest, toRemove) {
+  var newManifest = makeNewManifest();
+  
+  for(let index in oldManifest.content.sites){
+    var thisDoc = oldManifest.content.sites[index];
+    if (thisDoc.url != toRemove.url) {
+      newManifest.content.sites.push(thisDoc);
+    }
+  }
+  return newManifest;
+}
+
+
+function removeDocFromList(doc, cb) {
+  manifestStorage.get( manifest => {
+    manifestStorage.set(makeManifestWithoutDoc(manifest, doc, cb));
+  });
 }
 
 const manifestStorage = {
@@ -39,10 +63,10 @@ const manifestStorage = {
       }
     });
   },
-  set: (value) => {
+  set: (value, cb) => {
     console.log('setting manifest');
     console.log(value);
-    chrome.storage.local.set({manifest: JSON.stringify(value)});
+    chrome.storage.local.set({manifest: JSON.stringify(value)}, cb);
   }
 };
 

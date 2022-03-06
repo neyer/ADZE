@@ -13,7 +13,6 @@ function  addSiteToList() {
   };
   // Once you have the active tab, add it to the manifest
   console.log('sending the document');
-  console.log(docToAdd);
-   chrome.runtime.sendMessage({adze: { addDocument: docToAdd}});
+  chrome.runtime.sendMessage({adze: { addDocument: docToAdd}});
 }
 addSiteToList();

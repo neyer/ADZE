@@ -1,118 +1,74 @@
 
 (function() {
   function setup() {
-    document.querySelector("#adze-to-list-button").addEventListener("click", addSiteToList);
     restoreManifest();
   }
 
-  const MANIFEST_KEY = 'manifest';
-
-  const manifestStorage = {
-    get: cb => {
-      
-      var storedValue = localStorage.getItem(MANIFEST_KEY);
+const manifestStorage = {
+  get: (cb) => {
+    chrome.storage.local.get(['manifest'], (result) => {
+      storedValue = result.manifest;
       if (typeof storedValue === 'undefined') {
-        cb(storedValue);
+        cb(makeNewManifest());
       } else {
-        console.log('loaded value from storage')
-        console.log(storedValue);
-        cb(JSON.parse(storedValue));
+        return cb(JSON.parse(storedValue));
       }
-      /*
-      chrome.storage.sync.get([MANIFEST_KEY], result => {
-
-        console.log('loaded manifest');
-        console.log(result);
-        cb(result.manifest);
-      });
-      */
-    },
-    set: (value, cb) => {
-
-      console.log('setting manifest');
-      console.log(value);
-      localStorage.setItem(MANIFEST_KEY, JSON.stringify(value));
-     /*
-      chrome.storage.sync.set(
-        {
-          manifest: value,
-        },
-        () => {
-          cb();
-        }
-      );
-      */
-    },
-  };
-
-  function makeNewManifest() {
-    console.log('making new manifest');
-     return {
-       "meta": {},
-       "content" : {
-          "sites": []
-        }
-     };
+    });
+  },
+  set: (value) => {
+    console.log('setting manifest');
+    console.log(value);
+    chrome.storage.local.set({manifest: JSON.stringify(value)});
   }
+};
 
-  function isValidManfest() {
-    // TODO: add checks here, log if the data is corrupted rather than absent
-   return !(typeof manifest === 'undefined' || manifest === null || typeof manifest.meta === 'undefined');
-  }
+
 
   // on tab initialization
   function restoreManifest() {
     // Restore manifest to memory
     manifestStorage.get(manifest => {
-      if (!isValidManfest(manifest)) {
-        console.log('need new manifest');
-        console.log(manifest);
-
-        // Set counter value as 0
-        let newManifest = makeNewManifest();
-        manifestStorage.set(newManifest, () => {
-          setupManifest(newManifest);
-        });
-      } else {
-        console.log('had manifest');
-        setupManifest(manifest);
-      }
+       renderManifest(manifest);
     });
   }
 
-  function setupManifest(manifest) {
-    document.getElementById("message").innerHTML = JSON.stringify(manifest);
+  function htmlToElem(html) {
+    let temp = document.createElement('template');
+    html = html.trim(); // Never return a space text node as a result
+    temp.innerHTML = html;
+    return temp.content.firstChild;
   }
 
-  function  addSiteToList() {
-    var query = {active:true, currentWindow:true};
-  
-    // First, get the active tab
-    function callback(tabs) {
-        var currentTab = tabs[0];
-        console.log(currentTab);
-  
-        var title = currentTab.title;
-        var url = currentTab.url;
-        var faviconUrl = currentTab.favIconUrl;
-  
-        var docToAdd = {
-          title: currentTab.title,
-          url: currentTab.url,
-          favIconUrl: currentTab.favIconUrl,
-          timestamp_ms:  Date.now()
-        };
-        // Once you have the active tab, add it to the manifest
-        manifestStorage.get(manifest => {
-            console.log('adding to manifest');
-            console.log(manifest);
-            manifest.content.sites.push(docToAdd);
-            manifestStorage.set(manifest);
-            setupManifest(manifest);
-        });
-    }
-  
-    chrome.tabs.query(query, callback);
+  function removeAdzeLink(doc) {
+    console.log('removing');
+    console.log(doc);
+    chrome.runtime.sendMessage({adze: { removeDocument: doc}}, () => {
+      restoreManifest();
+    });
+
+  }
+
+  function renderSingleAdzeLink(doc) {
+      var html =[
+        '<li>',
+       "<span>&#x274C  </span>",
+        '<a href="', doc.url, '">', doc.title,
+        "</a></li>"
+      ].join('');
+      var thisDocElement = htmlToElem(html);
+      thisDocElement.children[0].addEventListener('click', () => {
+         removeAdzeLink(doc);
+      });
+    return thisDocElement;
+  }
+
+  function renderManifest(manifest) {
+    document.getElementById("message").innerHTML = JSON.stringify(manifest);
+    var linkListDom = document.getElementById("adze-link-list");
+    linkListDom.innerHTML = '';
+    manifest.content.sites.map(doc => {
+      linkListDom.appendChild(renderSingleAdzeLink(doc));
+    });
   }
   
   document.addEventListener('DOMContentLoaded', setup);
