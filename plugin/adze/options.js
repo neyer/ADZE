@@ -1,7 +1,11 @@
 
 (function() {
+
+
   function setup() {
     restoreManifest();
+
+    document.getElementById("upload-button").addEventListener("click", uploadManifest);
   }
 
 const manifestStorage = {
@@ -70,6 +74,16 @@ const manifestStorage = {
       linkListDom.appendChild(renderSingleAdzeLink(doc));
     });
   }
+
+  function uploadManifest() {
+    console.log('uploadin!');
+    const request = new Request(
+      "https://pastebin.com/api/api_post.php",
+  );
+    const url = request.url;
+    const method = request.method;
+    const credentials = request.credentials;
+    }
   
   document.addEventListener('DOMContentLoaded', setup);
 })();
