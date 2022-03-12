@@ -15,6 +15,9 @@
     "scripting",
     "storage"
   ],
+  "host_permissions": [
+    "*://pastebin.com/api/*"
+  ],
   "options_page": "options.html",
   "background": {
     "service_worker": "background.js"

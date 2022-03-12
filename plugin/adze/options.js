@@ -1,3 +1,15 @@
+async function requestUserKey(devKey, userName, password) {
+  const url = "https://pastebin.com/api/api_login.php";
+  const response = await fetch(url, {
+    method: "POST",
+    body: new URLSearchParams({
+      api_dev_key: devKey,
+      api_user_name: userName,
+      api_user_password: password,
+    }),
+  });
+  return response.text();
+}
 
 (function() {
 
@@ -75,15 +87,20 @@ const manifestStorage = {
     });
   }
 
-  function uploadManifest() {
+  async function uploadManifest() {
     console.log('uploadin!');
     const request = new Request(
       "https://pastebin.com/api/api_post.php",
-  );
+    );
     const url = request.url;
     const method = request.method;
     const credentials = request.credentials;
-    }
+    const devKey = document.getElementById("pastebin-dev-key").value;
+    const userName = document.getElementById("pastebin-username").value;
+    const password = document.getElementById("pastebin-password").value;
+    const userKey = await requestUserKey(devKey, userName, password);
+    console.log(userKey)
+  }
   
   document.addEventListener('DOMContentLoaded', setup);
 })();
