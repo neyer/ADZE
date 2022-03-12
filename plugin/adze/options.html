@@ -16,16 +16,23 @@
   <p id="message"></p>
 
   <h3>For Uploadin'</h3>
-<p>You'll need a pastebin user api key. Make an account at pastebin.com, and get a user key following the 
-<a href="https://pastebin.com/doc_api">instructions here</a>.
-</p>
-  <form id="pastebin-userkey-form">
-    <p><label><input id="pastebin-dev-key"></input>Pastebin Dev Key</label></p>
-    <p><label><input id="pastebin-username"></input>Pastebin username</label></p>
-    <p><label><input id="pastebin-password" type="password"></input>Pastebin password</label></p>
-  </form>
-  <p id="upload-message"></p>
-  <button id="upload-button">Upload</button>
+<div id="pastebin-upload-form" style="visbility:hidden">
+    <p id="upload-message"></p>
+    <button id="pastebin-upload-button">Upload</button>
+</div>
+<div id="pastebin-credentials-needed-form">
+  <p>You'll need a pastebin user api key. Make an account at pastebin.com, and get a user key following the 
+  <a href="https://pastebin.com/doc_api">instructions here</a>. Then, enter your dev key, username and password.
+  </p>
+    <form id="pastebin-userkey-form">
+      <p><label><input id="pastebin-dev-key"></input>Pastebin Dev Key</label></p>
+      <p><label><input id="pastebin-username"></input>Pastebin username</label></p>
+      <p><label><input id="pastebin-password" type="password"></input>Pastebin password</label></p>
+    </form>
+    <p id="pastebin-credentials-message"></p>
+    <button id="pastebin-get-credentials-button">Get User Key</button>
+</div>
+
 
 <script src="options.js"></script>
 </body>

@@ -1,23 +1,15 @@
-async function requestUserKey(devKey, userName, password) {
-  const url = "https://pastebin.com/api/api_login.php";
-  const response = await fetch(url, {
-    method: "POST",
-    body: new URLSearchParams({
-      api_dev_key: devKey,
-      api_user_name: userName,
-      api_user_password: password,
-    }),
-  });
-  return response.text();
-}
-
 (function() {
 
-
   function setup() {
-    restoreManifest();
+    
 
-    document.getElementById("upload-button").addEventListener("click", uploadManifest);
+    document.getElementById("pastebin-get-credentials-button").addEventListener("click", getPastebinCredentials);
+
+    document.getElementById("pastebin-upload-button").addEventListener("click", uploadManifestToPastebin);
+    restoreManifest();
+    restoreCredentials();
+
+
   }
 
 const manifestStorage = {
@@ -48,6 +40,16 @@ const manifestStorage = {
     });
   }
 
+  function restoreCredentials() {
+    chrome.runtime.sendMessage({adze: { getPastebinCredentials: {}}}, (response) => {
+      console.log("got response");
+      console.log(response);
+      if (response.hasUserKey) {
+        setPastebinCredentials(response);
+      }
+    });
+  }
+
   function htmlToElem(html) {
     let temp = document.createElement('template');
     html = html.trim(); // Never return a space text node as a result
@@ -56,8 +58,7 @@ const manifestStorage = {
   }
 
   function removeAdzeLink(doc) {
-    console.log('removing');
-    console.log(doc);
+    console.log('removing a doc');
     chrome.runtime.sendMessage({adze: { removeDocument: doc}}, () => {
       restoreManifest();
     });
@@ -87,19 +88,37 @@ const manifestStorage = {
     });
   }
 
-  async function uploadManifest() {
-    console.log('uploadin!');
-    const request = new Request(
-      "https://pastebin.com/api/api_post.php",
-    );
-    const url = request.url;
-    const method = request.method;
-    const credentials = request.credentials;
+  // credential management
+
+  async function getPastebinCredentials() {
+    console.log('getting credentials!');
     const devKey = document.getElementById("pastebin-dev-key").value;
     const userName = document.getElementById("pastebin-username").value;
     const password = document.getElementById("pastebin-password").value;
-    const userKey = await requestUserKey(devKey, userName, password);
-    console.log(userKey)
+
+    chrome.runtime.sendMessage({adze: { getPastebinCredentials: {
+        devKey: devKey,
+        userName: userName,
+        password: password
+      }}}, (credentials) => {
+      setPastebinCredentials(credentials);
+    });
+  }
+
+  async function uploadManifestToPastebin() {
+    console.log('uploading');
+    chrome.runtime.sendMessage({adze: { uploadToPastebin: {
+        url: '(none here yet',
+      }}}, (result) => {
+        console.log('got result of upload');
+        console.log(result);
+    });
+  }
+
+  function setPastebinCredentials(credentials) {
+    document.getElementById("pastebin-credentials-needed-form").style.visibility="hidden";
+    document.getElementById("pastebin-upload-form").style.visibility = "visible";
+    // todo: add the url to the upload button
   }
   
   document.addEventListener('DOMContentLoaded', setup);
