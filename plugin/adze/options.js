@@ -63,11 +63,13 @@ const manifestStorage = {
 
     allTabs.forEach( (tab) => {
       document.getElementById("btn-select-tab-"+tab).classList.remove('is-active');
-      document.getElementById("section-"+tab).classList.add('is-invisible');
+      document.getElementById("section-"+tab).style="height:0px; padding:0px";
+      document.getElementById("section-"+tab).classList.add("is-invisible");
     });
 
     document.getElementById("btn-select-tab-"+tabName).classList.add('is-active');
-    document.getElementById("section-"+tabName).classList.remove('is-invisible');
+      document.getElementById("section-"+tabName).classList.remove("is-invisible");
+    document.getElementById("section-"+tabName).style = "";
   }
 
   function htmlToElem(html) {
