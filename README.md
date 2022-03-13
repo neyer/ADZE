@@ -3,9 +3,11 @@
 
 # Reinvent the magic of the web with just the right primtives
 
-In a nutshell, ADZE is "Recursive Lists of Rated Links."
+In a nutshell, ADZE is a **Relevance Protocol**.
 
-ADZE is a protocol that rides on top of HTTP. Users will store lists of links they have opinions on, at publicly accessible urls. These lists can also include links to other user's lists.   By recursively crawling the lists of rated links, adze peers will be able get a list of high quality links, on their local machine.  Adze peers can choose which other peers they think have good quality, and will get the content of those users' peer lists as well.
+
+
+ADZE is a protocol that rides on top of HTTP. Adze peers exchange ineformation about relevance using "Recursive Lists of Rated Links."  Users will store lists of links they have opinions on, at publicly accessible urls. These lists can also include links to other user's lists.   By recursively crawling the lists of rated links, adze peers will be able get a list of high quality links, on their local machine.  Adze peers can choose which other peers they think have good quality, and will get the content of those users' peer lists as well.
 
 A browser plugin is provided, showing how this all fits together.
 
