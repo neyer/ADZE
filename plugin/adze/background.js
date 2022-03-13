@@ -1,5 +1,4 @@
 chrome.action.onClicked.addListener((tab) => {
-  console.log('here, about to execute the script!');
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: ['content.js']
@@ -7,8 +6,6 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('got message');
-  console.log(request);
 
   if (typeof request.adze === 'undefined') {
     return true;
@@ -17,9 +14,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     addDocToList(request.adze.addDocument);
   } else if (request.adze.removeDocument) {
     removeDocFromList(request.adze.removeDocument);
-  } else if (request.adze.getPastebinCredentials) {
+  } else if (request.adze.getGithubCredentials) {
     // Asynchronously fetch all data from storage.sync.
-    getPastebinCredentials(request.adze.getPastebinCredentials).then(
+    getGithubCredentials(request.adze.getGithubCredentials).then(
           (result)  => {
            sendResponse(result);
    });
@@ -27,9 +24,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // if you dont' do this here, the runtime will drop the connection
     // and you won't be able to send the response.
     return true;
-  } else if (request.adze.uploadToPastebin) {
+  } else if (request.adze.uploadToGithub) {
     // Asynchronously fetch all data from storage.sync.
-    uploadManifestToPastebin().then(
+    uploadManifestToGithub(request.adze.uploadToGithub).then(
           (result)  => {
            sendResponse(result);
    });
@@ -42,8 +39,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 function addDocToList(doc) {
   manifestStorage.get( manifest => {
-    console.log('adding to manifest');
-    console.log(manifest);
     manifest.content.sites.push(doc);
     manifestStorage.set(manifest);
   });
@@ -68,7 +63,6 @@ function removeDocFromList(doc, cb) {
   });
 }
 
-// todo: replace this with just the async version
 const manifestStorage = {
   get: (cb) => {
     chrome.storage.local.get(['manifest'], (result) => {
@@ -76,22 +70,17 @@ const manifestStorage = {
       if (typeof storedValue === 'undefined') {
         cb(makeNewManifest());
       } else {
-        console.log('loaded value from storage');
-        console.log(storedValue);
         return cb(JSON.parse(storedValue));
       }
     });
   },
   set: (value, cb) => {
-    console.log('setting manifest');
-    console.log(value);
     chrome.storage.local.set({manifest: JSON.stringify(value)}, cb);
   }
 };
 
 
 function makeNewManifest() {
-  console.log('making new manifest');
    return {
      "meta": {},
      "content" : {
@@ -106,27 +95,7 @@ function isValidManfest() {
 }
 
 
-// Pastebin logins
-async function requestUserKey(devKey, userName, password) {
-  const url = "https://pastebin.com/api/api_login.php";
-  const response = await fetch(url, {
-    method: "POST",
-    body: new URLSearchParams({
-      api_dev_key: devKey,
-      api_user_name: userName,
-      api_user_password: password,
-    }),
-  });
-  return response.text();
-}
-
-function isValidCredentialRequest(credentialRequest) {
-  return !(typeof credentialRequest.devKey === 'undefined' ||
-           typeof credentialRequest.userName === 'undefined' ||
-           typeof credentialRequest.password === 'undefined')
-}
-
-
+// Github logins
 function getStoredManifest() {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
@@ -152,8 +121,6 @@ function getStoredCredentials() {
         return reject(chrome.runtime.lastError);
       }
       // Pass the data retrieved from storage down the promise chain.
-      console.log('loaded existing credentials!');
-      console.log(result.credentials);
       resolve(result.credentials);
     });
   });
@@ -165,8 +132,6 @@ function saveCredentials(credentials) {
     // Asynchronously fetch all data from storage.sync.
     chrome.storage.local.set({credentials:credentials}, (result) => {
       // Pass any observed errors down the promise chain.
-      console.log('Saved credentials!');
-      console.log(credentials);
       if (chrome.runtime.lastError) {
         return reject(chrome.runtime.lastError);
       }
@@ -175,61 +140,66 @@ function saveCredentials(credentials) {
     });
   });
 }
-async function getPastebinCredentials(credentialRequest) {
-    storedValue = await getStoredCredentials();
+async function getGithubCredentials(credentialRequest) {
+    const storedValue = await getStoredCredentials();
     if (!(typeof storedValue === 'undefined' ||
-          typeof storedValue.pastebin === 'undefined' ||
-          typeof storedValue.pastebin.devKey === 'undefined' ||
-           typeof storedValue.pastebin.userKey === 'undefined')) {
-       console.log('alerady had a  user key!');
-        return {hasUserKey:true, url:storedValue.pastebin.manifestUrl};
-    } else if (isValidCredentialRequest(credentialRequest)) {
-       console.log('trying new credential request');
-       const userKey = await getNewPastebinUserKey(credentialRequest);
-       const credentials = { pastebin: {
-            userKey: userKey, 
-            devKey: credentialRequest.devKey,
-            manifestUrl: '(none)' }}
-         console.log("storing user key here "+userKey);
-      await saveCredentials(credentials);
-      return {hasUserKey:true}
-       
+          typeof storedValue.github === 'undefined')) {
+        return {hasAuthToken:true, 
+                authToken: storedValue.github.authToken,
+                userName: storedValue.github.userName,
+                url:storedValue.github.manifestUrl};
    } else {
      // no user key was found, not a valid request
-     console.log('need credentials!');
-     return {hasUserKey:false};
+     return {hasAuthToken: false};
    }
 }
 
 
-async function getNewPastebinUserKey(credentialRequest) {
-  console.log('getting pastebin credentials');
-  console.log(credentialRequest);
-  const devKey = credentialRequest.devKey;
-  const userName = credentialRequest.userName;
-  const password = credentialRequest.password;
-  const userKey = await requestUserKey(devKey, userName, password);
-  return userKey;
-}
- 
-
-
-async function uploadManifestToPastebin() {
-  const url = "https://pastebin.com/api/api_post.php";
+async function uploadManifestToGithub(uploadRequest) {
+  // we might end up 
+  let url = "https://api.github.com/gists";
   const storedManifest = await getStoredManifest();
-  const credentials = await getStoredCredentials();
+  const storedCredentials = await getStoredCredentials();
+  const manifestFileName = 'adze-manifest.json';
+  // prepare the parameters to the API call
+  let filesDict = {}
+  filesDict[manifestFileName] = { content: JSON.stringify(storedManifest) };
+  const paramsDict = {
+    descripton: 'adze manifest',
+    files:  filesDict,
+    public: true 
+  };
+  // if we are patching an existing gist we use the PATCH method
+  // and add the id of the existing gist
+  if (storedCredentials.github && 
+      typeof storedCredentials.github.gistId !== 'undefined') {
+    var method = "PATCH";
+    url = url + "/" + storedCredentials.github.gistId;
+  } else {
+    var method = "POST";
+  }
+
+  // use basic authentication
+  const username = uploadRequest.userName;
+  const password = uploadRequest.authToken;
+  let headers = new Headers();
+  headers.append(
+    'Authorization', 'Basic '+btoa(username + ":" + password));
   const response = await fetch(url, {
-    method: "POST",
-    body: new URLSearchParams({
-      api_dev_key: credentials.pastebin.devKey,
-      api_user_key: credentials.pastebin.userKey,
-      api_option:  'paste',
-      api_paste_name: 'adze-manifest.json',
-      api_paste_format: 'json',
-      api_paste_code: JSON.stringify(storedManifest),
-    }),
+    body: JSON.stringify(paramsDict),
+    method: method,
+    headers:headers
   });
-  console.log('sent API requqest');
-  return response.text();
+  var responseBody = await response.text();
+  response_json = JSON.parse(responseBody);
+  const uploadUrl = response_json.files[manifestFileName].raw_url;
+  const credentialsToSave = { github: {
+    userName: uploadRequest.userName,
+    authToken: uploadRequest.authToken,
+    manifestUrl: uploadUrl,
+    gistId: response_json.id
+  } }
+  await saveCredentials(credentialsToSave);
+  return uploadUrl;
 }
 

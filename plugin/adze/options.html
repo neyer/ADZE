@@ -16,21 +16,18 @@
   <p id="message"></p>
 
   <h3>For Uploadin'</h3>
-<div id="pastebin-upload-form" style="visbility:hidden">
+<div id="github-upload-form" style="visbility:hidden">
     <p id="upload-message"></p>
-    <button id="pastebin-upload-button">Upload</button>
+    <button id="github-upload-button">Upload</button>
 </div>
-<div id="pastebin-credentials-needed-form">
-  <p>You'll need a pastebin user api key. Make an account at pastebin.com, and get a user key following the 
-  <a href="https://pastebin.com/doc_api">instructions here</a>. Then, enter your dev key, username and password.
+<div id="github-credentials-needed-form">
+  <p>You'll need a github account and personal access auth token. Follow the 
+  <a href="https://github.com/settings/tokens/new">instructions here</a>. Make sure it has the 'gists' permission.
   </p>
-    <form id="pastebin-userkey-form">
-      <p><label><input id="pastebin-dev-key"></input>Pastebin Dev Key</label></p>
-      <p><label><input id="pastebin-username"></input>Pastebin username</label></p>
-      <p><label><input id="pastebin-password" type="password"></input>Pastebin password</label></p>
+    <form id="github-token-form">
+      <p><label><input id="github-user-name"></input>Github User Name</label></p>
+      <p><label><input id="github-auth-token"></input>Github Auth Token</label></p>
     </form>
-    <p id="pastebin-credentials-message"></p>
-    <button id="pastebin-get-credentials-button">Get User Key</button>
 </div>
 
 

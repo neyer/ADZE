@@ -3,9 +3,7 @@
   function setup() {
     
 
-    document.getElementById("pastebin-get-credentials-button").addEventListener("click", getPastebinCredentials);
-
-    document.getElementById("pastebin-upload-button").addEventListener("click", uploadManifestToPastebin);
+    document.getElementById("github-upload-button").addEventListener("click", uploadManifestToGithub);
     restoreManifest();
     restoreCredentials();
 
@@ -41,11 +39,9 @@ const manifestStorage = {
   }
 
   function restoreCredentials() {
-    chrome.runtime.sendMessage({adze: { getPastebinCredentials: {}}}, (response) => {
-      console.log("got response");
-      console.log(response);
-      if (response.hasUserKey) {
-        setPastebinCredentials(response);
+    chrome.runtime.sendMessage({adze: { getGithubCredentials: {}}}, (response) => {
+      if (response.hasAuthToken) {
+        setGithubCredentials(response);
       }
     });
   }
@@ -89,36 +85,40 @@ const manifestStorage = {
   }
 
   // credential management
-
-  async function getPastebinCredentials() {
-    console.log('getting credentials!');
-    const devKey = document.getElementById("pastebin-dev-key").value;
-    const userName = document.getElementById("pastebin-username").value;
-    const password = document.getElementById("pastebin-password").value;
-
-    chrome.runtime.sendMessage({adze: { getPastebinCredentials: {
-        devKey: devKey,
-        userName: userName,
-        password: password
-      }}}, (credentials) => {
-      setPastebinCredentials(credentials);
-    });
-  }
-
-  async function uploadManifestToPastebin() {
+  async function uploadManifestToGithub() {
     console.log('uploading');
-    chrome.runtime.sendMessage({adze: { uploadToPastebin: {
-        url: '(none here yet',
-      }}}, (result) => {
-        console.log('got result of upload');
-        console.log(result);
+
+    const authToken = document.getElementById("github-auth-token").value;
+    const userName = document.getElementById("github-user-name").value;
+    chrome.runtime.sendMessage({adze: { uploadToGithub: {
+        authToken: authToken,
+        userName: userName,
+      }}}, (uploadDestination) => {
+      shareUploadLink(uploadDestination);
     });
   }
 
-  function setPastebinCredentials(credentials) {
-    document.getElementById("pastebin-credentials-needed-form").style.visibility="hidden";
-    document.getElementById("pastebin-upload-form").style.visibility = "visible";
-    // todo: add the url to the upload button
+  function shareUploadLink(uploadDestination) {
+      var html =[
+        "<span>ADZE list uploaded to ",
+        '<a href="', uploadDestination, '">', uploadDestination,
+        "</a> Share it with your friends!",
+        "</span>"
+      ].join('');
+
+      var messageDom = document.getElementById("upload-message");
+      messageDom.innerHTML = '';
+      messageDom.appendChild(htmlToElem(html));
+  }
+
+  function setGithubCredentials(credentials) {
+    document.getElementById("github-upload-form").style.visibility = "visible";
+    document.getElementById("github-auth-token").value = credentials.authToken;
+    document.getElementById("github-user-name").value = credentials.userName;
+
+    if (credentials.url && credentials.url.startsWith('http')) {
+      shareUploadLink(credentials.url);
+    }
   }
   
   document.addEventListener('DOMContentLoaded', setup);
