@@ -2,10 +2,22 @@
 <html>
 <head>
   <title>ADZE Options</title>
+  <link rel="stylesheet" href="bulma.css" />
   <link rel="stylesheet" href="options.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <p class="title">Adze Plugin Options</p>
+<section class="section">
+  <div class="container">
+  <p class="title">Adze Relance Protocol Plugin</p>
+  <div class="tabs is-medium is-centered">
+    <ul>
+      <li class="is-active" id="btn-select-tab-feed"><a>feed</a></li>
+      <li id="btn-select-tab-links"><a>my links</a></li>
+      <li id="btn-select-tab-peers"><a>my peers</a></li>
+      <li id="btn-select-tab-setup"><a>setup</a></li>
+     </ul>
+  </div>
   <div>
       <h2>Adzed Links</h2>
       <ul id="adze-link-list">
@@ -29,8 +41,9 @@
       <p><label><input id="github-auth-token"></input>Github Auth Token</label></p>
     </form>
 </div>
-
-
+</div<
+</section>
+</div>
 <script src="options.js"></script>
 </body>
 </html>

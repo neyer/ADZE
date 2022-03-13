@@ -46,6 +46,12 @@ const manifestStorage = {
     });
   }
 
+
+  // tab navigation
+  function setActiveTab(tabName) {
+    const allTabs = ["feed", "links", "peers", "setup"]
+  }
+
   function htmlToElem(html) {
     let temp = document.createElement('template');
     html = html.trim(); // Never return a space text node as a result
