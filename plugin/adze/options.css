@@ -15,3 +15,7 @@
 }
 
 
+section.is-invisible {
+  height: 0px;
+  padding: 0px;
+}

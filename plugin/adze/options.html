@@ -10,6 +10,7 @@
 <section class="section">
   <div class="container">
   <p class="title">Adze Relance Protocol Plugin</p>
+  <p id="upload-message"></p>
   <div class="tabs is-medium is-centered">
     <ul>
       <li class="is-active" id="btn-select-tab-feed"><a>feed</a></li>
@@ -18,30 +19,39 @@
       <li id="btn-select-tab-setup"><a>setup</a></li>
      </ul>
   </div>
-  <div>
-      <h2>Adzed Links</h2>
-      <ul id="adze-link-list">
-      </ul>
-  </div>
 
-  <h3>For Debuggin'</h3>
+  <section class="section is-medium" id="section-feed">
+  </section>
+  <section class="section is-medium" id="section-links">
+    <div>
+        <h2>Adzed Links</h2>
+        <ul id="adze-link-list">
+        </ul>
+    </div>
+  </section>
+
+  <section class="section is-medium" id="section-peers">
+  </section>
+  <section class="section is-medium" id="section-setup">
+
+  <h3 class="title is-3">For Debuggin'</h3>
   <p id="message"></p>
 
-  <h3>For Uploadin'</h3>
-<div id="github-upload-form" style="visbility:hidden">
-    <p id="upload-message"></p>
-    <button id="github-upload-button">Upload</button>
-</div>
-<div id="github-credentials-needed-form">
-  <p>You'll need a github account and personal access auth token. Follow the 
-  <a href="https://github.com/settings/tokens/new">instructions here</a>. Make sure it has the 'gists' permission.
-  </p>
-    <form id="github-token-form">
-      <p><label><input id="github-user-name"></input>Github User Name</label></p>
-      <p><label><input id="github-auth-token"></input>Github Auth Token</label></p>
-    </form>
-</div>
-</div<
+  <h3 class="title is-3">For Uploadin'</h3>
+      <div id="github-upload-form" style="visbility:hidden">
+          <button id="github-upload-button">Upload</button>
+      </div>
+      <div id="github-credentials-needed-form">
+        <p>You'll need a github account and personal access auth token.<br> Follow the 
+        <a href="https://github.com/settings/tokens/new">instructions here</a>. Make sure it has the 'gists' permission.
+        </p>
+          <form id="github-token-form">
+            <p><label><input id="github-user-name"></input>Github User Name</label></p>
+            <p><label><input id="github-auth-token"></input>Github Auth Token</label></p>
+          </form>
+      </div>
+  </section>
+  </div<
 </section>
 </div>
 <script src="options.js"></script>

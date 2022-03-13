@@ -2,11 +2,11 @@
 
   function setup() {
     
-
     document.getElementById("github-upload-button").addEventListener("click", uploadManifestToGithub);
     restoreManifest();
     restoreCredentials();
-
+    setupTabs();
+    setActiveTab('setup');
 
   }
 
@@ -48,8 +48,26 @@ const manifestStorage = {
 
 
   // tab navigation
+  function setupTabs() {
+    const allTabs = ["feed", "links", "peers", "setup"]
+
+    allTabs.forEach( (tab) => {
+      document.getElementById("btn-select-tab-"+tab).addEventListener("click", () => {
+         setActiveTab(tab);
+      });
+    });
+  }
+
   function setActiveTab(tabName) {
     const allTabs = ["feed", "links", "peers", "setup"]
+
+    allTabs.forEach( (tab) => {
+      document.getElementById("btn-select-tab-"+tab).classList.remove('is-active');
+      document.getElementById("section-"+tab).classList.add('is-invisible');
+    });
+
+    document.getElementById("btn-select-tab-"+tabName).classList.add('is-active');
+    document.getElementById("section-"+tabName).classList.remove('is-invisible');
   }
 
   function htmlToElem(html) {
@@ -118,7 +136,6 @@ const manifestStorage = {
   }
 
   function setGithubCredentials(credentials) {
-    document.getElementById("github-upload-form").style.visibility = "visible";
     document.getElementById("github-auth-token").value = credentials.authToken;
     document.getElementById("github-user-name").value = credentials.userName;
 
