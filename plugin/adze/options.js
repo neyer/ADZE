@@ -101,13 +101,35 @@ const manifestStorage = {
     return thisDocElement;
   }
 
+  function renderSingleAdzePeer(peer) {
+      var html =[
+        '<li>',
+       "<span>&#x274C  </span>",
+        '<a href="', peer.url, '">', peer.title,
+        "</a></li>"
+      ].join('');
+      var thisDocElement = htmlToElem(html);
+      thisDocElement.children[0].addEventListener('click', () => {
+         removeAdzeLink(doc);
+      });
+    return thisDocElement;
+  }
+
   function renderManifest(manifest) {
     document.getElementById("message").innerHTML = JSON.stringify(manifest);
-    var linkListDom = document.getElementById("adze-link-list");
+    // render links
+    let linkListDom = document.getElementById("adze-link-list");
     linkListDom.innerHTML = '';
     manifest.content.sites.map(doc => {
       linkListDom.appendChild(renderSingleAdzeLink(doc));
     });
+     // render peers 
+    let peerListDom = document.getElementById("adze-peer-list");
+    peerListDom.innerHTML = '';
+    manifest.content.peers.map(peer => {
+      peerListDom.appendChild(renderSingleAdzePeer(peer));
+    });
+
   }
 
   // credential management

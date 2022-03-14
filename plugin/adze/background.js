@@ -82,9 +82,10 @@ const manifestStorage = {
 
 function makeNewManifest() {
    return {
-     "meta": {},
+     "meta": { "username": "uknown"},
      "content" : {
-        "sites": []
+        "sites": [],
+        "peers": []
       }
    };
 }
@@ -107,6 +108,20 @@ function getStoredManifest() {
       }
       // Pass the data retrieved from storage down the promise chain.
       resolve(result);
+    });
+  });
+}
+function saveManifest(manifest) {
+  // Immediately return a promise and start asynchronous work
+  return new Promise((resolve, reject) => {
+    // Asynchronously fetch all data from storage.sync.
+    manifestStorage.set(manifest, (result) => {
+      // Pass any observed errors down the promise chain.
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      // Pass the data retrieved from storage down the promise chain.
+      resolve();
     });
   });
 }
@@ -199,6 +214,12 @@ async function uploadManifestToGithub(uploadRequest) {
     manifestUrl: uploadUrl,
     gistId: response_json.id
   } }
+  // update the manifest with a username if necessary
+  if (typeof storedManifest.meta.username === 'undefined') {
+    storedManifest.meta.username = uploadRequest.userName;
+    storedManifest.content.peers = [];
+    await saveManifest(storedManifest);
+  } 
   await saveCredentials(credentialsToSave);
   return uploadUrl;
 }
