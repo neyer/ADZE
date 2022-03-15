@@ -19,31 +19,12 @@
 
   }
 
-const manifestStorage = {
-  get: (cb) => {
-    chrome.storage.local.get(['manifest'], (result) => {
-      storedValue = result.manifest;
-      if (typeof storedValue === 'undefined') {
-        cb(makeNewManifest());
-      } else {
-        return cb(JSON.parse(storedValue));
-      }
-    });
-  },
-  set: (value) => {
-    console.log('setting manifest');
-    console.log(value);
-    chrome.storage.local.set({manifest: JSON.stringify(value)});
-  }
-};
-
-
 
   // on tab initialization
   function restoreManifest() {
     // Restore manifest to memory
-    manifestStorage.get(manifest => {
-       renderManifest(manifest);
+    chrome.runtime.sendMessage({adze: { getManifest: {}}}, (response) => {
+      renderManifest(response);
     });
   }
 

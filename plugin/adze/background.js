@@ -16,7 +16,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   else if (request.adze.updateFeed) {
     updateFeed(request.adze.updateFeed).then(sendResult);
   } 
-  else if (request.adze.addDocument) {
+  else if (request.adze.getManifest) {
+    getStoredManifest().then(sendResult);
+  } else if (request.adze.addDocument) {
     addDocToList(request.adze.addDocument).then(sendResult);
   } else if (request.adze.removeDocument) {
     removeDocFromList(request.adze.removeDocument).then(sendResult);
