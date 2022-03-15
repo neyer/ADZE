@@ -3,6 +3,8 @@
   function setup() {
     
     document.getElementById("github-upload-button").addEventListener("click", uploadManifestToGithub);
+
+    document.getElementById("btn-add-peer").addEventListener("click", addPeerFromInputBox);
     restoreManifest();
     restoreCredentials();
     setupTabs();
@@ -80,11 +82,15 @@ const manifestStorage = {
   }
 
   function removeAdzeLink(doc) {
-    console.log('removing a doc');
     chrome.runtime.sendMessage({adze: { removeDocument: doc}}, () => {
       restoreManifest();
     });
+  }
 
+  function removeAdzePeer(peer) {
+    chrome.runtime.sendMessage({adze: { removePeer: peer}}, () => {
+      restoreManifest();
+    });
   }
 
   function renderSingleAdzeLink(doc) {
@@ -105,12 +111,12 @@ const manifestStorage = {
       var html =[
         '<li>',
        "<span>&#x274C  </span>",
-        '<a href="', peer.url, '">', peer.title,
+        '<a href="', peer.url, '">', peer.nickname,
         "</a></li>"
       ].join('');
       var thisDocElement = htmlToElem(html);
       thisDocElement.children[0].addEventListener('click', () => {
-         removeAdzeLink(doc);
+         removeAdzePeer(peer);
       });
     return thisDocElement;
   }
@@ -130,6 +136,19 @@ const manifestStorage = {
       peerListDom.appendChild(renderSingleAdzePeer(peer));
     });
 
+  }
+  
+  // Peers
+
+  async function addPeerFromInputBox() {
+    let peerAddress = document.getElementById("input-peer-url").value;
+    chrome.runtime.sendMessage({adze: { addPeer: {
+        url: peerAddress,
+        nickname: '(name not fetched yet)'
+      }}}, (manifest) => {
+      renderManifest(manifest);
+    });
+ 
   }
 
   // credential management

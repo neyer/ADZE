@@ -7,45 +7,47 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
+  function sendResult(result) {
+    sendResponse(result);
+  }
   if (typeof request.adze === 'undefined') {
     return true;
   }
+  // Links
   else if (request.adze.addDocument) {
-    addDocToList(request.adze.addDocument);
+    addDocToList(request.adze.addDocument).then(sendResult);
   } else if (request.adze.removeDocument) {
-    removeDocFromList(request.adze.removeDocument);
+    removeDocFromList(request.adze.removeDocument).then(sendResult);
+  // Peers
+  }  else if (request.adze.addPeer) {
+    addPeerToList(request.adze.addPeer).then(sendResult);
+  }  else if (request.adze.removePeer) {
+    removePeerFromList(request.adze.removePeer).then(sendResult);
+  // Uploading
   } else if (request.adze.getGithubCredentials) {
-    // Asynchronously fetch all data from storage.sync.
-    getGithubCredentials(request.adze.getGithubCredentials).then(
-          (result)  => {
-           sendResponse(result);
-   });
-    // This tells the runtime, 'yes we will return a response'.
-    // if you dont' do this here, the runtime will drop the connection
-    // and you won't be able to send the response.
-    return true;
+    getGithubCredentials(request.adze.getGithubCredentials).then(sendResult);
   } else if (request.adze.uploadToGithub) {
-    // Asynchronously fetch all data from storage.sync.
-    uploadManifestToGithub(request.adze.uploadToGithub).then(
-          (result)  => {
-           sendResponse(result);
-   });
-    // This tells the runtime, 'yes we will return a response'.
-    // if you dont' do this here, the runtime will drop the connection
-    // and you won't be able to send the response.
-    return true;
+    uploadManifestToGithub(request.adze.uploadToGithub).then(sendResut);
   }
+  // This tells the runtime, 'yes we will return a response'.
+  // if you dont' do this here, the runtime will drop the connection
+  // and you won't be able to send the response.
+  return true;
 });
 
-function addDocToList(doc) {
-  manifestStorage.get( manifest => {
-    manifest.content.sites.push(doc);
-    manifestStorage.set(manifest);
-  });
+
+// Doc (link) management
+async function addDocToList(doc) {
+  var manifest = await getStoredManifest();
+  manifest.content.sites.push(doc);
+  manifestStorage.set(manifest);
+  return manifest;
 }
 
 function makeManifestWithoutDoc(oldManifest, toRemove) {
   var newManifest = makeNewManifest();
+  newManifest.meta = oldManifest.meta;
+  newManifest.content.peers = oldManifest.content.peers;
   
   for(let index in oldManifest.content.sites){
     var thisDoc = oldManifest.content.sites[index];
@@ -57,11 +59,75 @@ function makeManifestWithoutDoc(oldManifest, toRemove) {
 }
 
 
-function removeDocFromList(doc, cb) {
-  manifestStorage.get( manifest => {
-    manifestStorage.set(makeManifestWithoutDoc(manifest, doc, cb));
-  });
+async function removeDocFromList(doc, cb) {
+  var manifest = await getStoredManifest();
+  var newManifest = makeManifestWithoutDoc(manifest, doc);
+  manifestStorage.set(newManifest);
+  return newManifest;
 }
+
+
+/// Peers
+async function getPeerManifest(url) {
+  const response = await fetch(url, {
+    method: 'GET',
+  });
+  var responseBody = await response.text();
+  return JSON.parse(responseBody);
+}
+
+
+function hasPeerAlready(manifest, peer) {
+  for(var peerNum in manifest.content.peers) {  
+    var thisPeer = manifest.content.peers[peerNum];
+    if (thisPeer.url == peer.url) {
+      return true;
+    }
+  }
+  return false;
+}
+
+async function addPeerToList(peer) {
+  var manifest = await getStoredManifest();
+
+  if (hasPeerAlready(manifest, peer)) {
+      console.log("Peer "+peer.url+" already exists!");
+      // TODO: signal that the user has alrady added this peer
+      // maybe with some animation that higlights the entry in the list
+      return manifest;
+  }
+
+  var peerManifest = await getPeerManifest(peer.url);
+  peer.nickname = peerManifest.meta.username;
+
+  manifest.content.peers.push(peer);
+  manifestStorage.set(manifest);
+  return manifest;
+}
+
+async function removePeerFromList(peer) {
+  var manifest = await getStoredManifest();
+  var newManifest = makeManifestWithoutPeer(manifest, peer);
+  manifestStorage.set(newManifest);
+  return newManifest;
+}
+
+function makeManifestWithoutPeer(oldManifest, toRemove) {
+  var newManifest = makeNewManifest();
+  newManifest.meta = oldManifest.meta;
+  newManifest.content.sites = oldManifest.content.sites;
+  
+  for(let index in oldManifest.content.peers){
+    var thisPeer = oldManifest.content.peers[index];
+    if (thisPeer.url != toRemove.url) {
+      newManifest.content.peers.push(thisPeer);
+    }
+  }
+  return newManifest;
+}
+
+
+
 
 const manifestStorage = {
   get: (cb) => {
