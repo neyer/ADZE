@@ -6,7 +6,6 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-
   function sendResult(result) {
     sendResponse(result);
   }
@@ -14,6 +13,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   // Links
+  else if (request.adze.updateFeed) {
+    updateFeed(request.adze.updateFeed).then(sendResult);
+  } 
   else if (request.adze.addDocument) {
     addDocToList(request.adze.addDocument).then(sendResult);
   } else if (request.adze.removeDocument) {
@@ -27,13 +29,57 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.adze.getGithubCredentials) {
     getGithubCredentials(request.adze.getGithubCredentials).then(sendResult);
   } else if (request.adze.uploadToGithub) {
-    uploadManifestToGithub(request.adze.uploadToGithub).then(sendResut);
+    uploadManifestToGithub(request.adze.uploadToGithub).then(sendResult);
   }
   // This tells the runtime, 'yes we will return a response'.
   // if you dont' do this here, the runtime will drop the connection
   // and you won't be able to send the response.
   return true;
 });
+
+// Feed
+const MANIFEST_CACHE_PEER =  'adzePeerManifestCache';
+function makeNewCache() { 
+  return{
+    // mapping from peer to manifest file
+    peers: []
+  };
+}
+async function updatePeerManifestCache() {
+  var localManifest = await getStoredManifest();
+  // todo: have this load from stored value to update rether than make a new one
+  var currentCache = makeNewCache();
+  // update the list of all cached content from the peers
+  for (var peerNo in localManifest.content.peers) {
+    var peer = localManifest.content.peers[peerNo];
+    var thisPeerManifest = await getPeerManifest(peer.url);
+    currentCache.peers.push(thisPeerManifest);
+  }
+    // todo: save this cache
+  return currentCache;
+}
+
+function flattenPeerLinksList(peerManifestCache) {
+  // combines links from multuple peers into a single feed
+  // for now all we are doing is  putting them in whatever order they are
+  // todo: eventually give way more options for sorting/scoring
+  var linksList = []
+  for (var key in peerManifestCache.peers) {
+    var thisPeerManifest = peerManifestCache.peers[key]
+    thisPeerManifest.content.sites.map((doc) => {
+      linksList.push(doc);
+    });
+  }
+  return linksList;
+}
+
+async function updateFeed() {
+  var manifest = await getStoredManifest();
+  var peerCache = await updatePeerManifestCache();
+  // update the list of all cached content from the peers
+  // todo: make this show peers' sites instead
+  return flattenPeerLinksList(peerCache);
+}
 
 
 // Doc (link) management
@@ -127,8 +173,6 @@ function makeManifestWithoutPeer(oldManifest, toRemove) {
 }
 
 
-
-
 const manifestStorage = {
   get: (cb) => {
     chrome.storage.local.get(['manifest'], (result) => {
@@ -151,7 +195,11 @@ function makeNewManifest() {
      "meta": { "username": "uknown"},
      "content" : {
         "sites": [],
-        "peers": []
+        "peers": [
+          {"url":"https://gist.githubusercontent.com/neyer/780867d03c8764e58c8f5e8396df5c7f/raw/cfe6a124d3e2a282a1e9f0e7d8432fe1c3334e60/adze-manifest.json",
+          "nickname" : "axphard (adze creator)"
+          }
+         ]
       }
    };
 }
@@ -161,8 +209,38 @@ function isValidManfest() {
  return !(typeof manifest === 'undefined' || manifest === null || typeof manifest.meta === 'undefined');
 }
 
+// Peer Manifest Cache
+function getLocalStorageValue(key) {
+  // Immediately return a promise and start asynchronous work
+  return new Promise((resolve, reject) => {
+    // Asynchronously fetch all data from storage
+    chrome.storage.local.get([key], (result) => {
+      // Pass any observed errors down the promise chain.
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      // Pass the data retrieved from storage down the promise chain.
+      resolve(result.key);
+    });
+  });
+}
 
-// Github logins
+function setLocalStorageValue(key, value) {
+  // Immediately return a promise and start asynchronous work
+  return new Promise((resolve, reject) => {
+    storageCommand = {};
+    storageCommand[key] = value;
+    chrome.storage.local.set(storageCommand, (result) => {
+      // Pass any observed errors down the promise chain.
+      if (chrome.runtime.lastError) {
+        return reject(chrome.runtime.lastError);
+      }
+      // Pass the data retrieved from storage down the promise chain.
+      resolve();
+    });
+  });
+}
+// Manifest
 function getStoredManifest() {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
@@ -192,6 +270,7 @@ function saveManifest(manifest) {
   });
 }
 
+// Credentials
 function getStoredCredentials() {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {

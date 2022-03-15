@@ -2,13 +2,20 @@
 
   function setup() {
     
-    document.getElementById("github-upload-button").addEventListener("click", uploadManifestToGithub);
+   document.getElementById("btn-update-feed").addEventListener("click", updateFeed);
+
+
+    document.getElementById("btn-upload-github").addEventListener("click", uploadManifestToGithub);
 
     document.getElementById("btn-add-peer").addEventListener("click", addPeerFromInputBox);
+    //TODO: fetch the document and get the title
+    // move that logic into background.js
+    //document.getElementById("btn-add-link").addEventListener("click", addLinkFromInputBox);
+    setupTabs();
+    setActiveTab('feed');
     restoreManifest();
     restoreCredentials();
-    setupTabs();
-    setActiveTab('setup');
+    updateFeed();
 
   }
 
@@ -81,6 +88,18 @@ const manifestStorage = {
     return temp.content.firstChild;
   }
 
+  // feed stuff
+  function updateFeed() {
+    chrome.runtime.sendMessage({adze: { updateFeed: {} }}, (feedDocs) => {
+      renderFeed(feedDocs);
+      document.getElementById("text-feed-updated-timestamp").innerHTML = 
+        "Last updated "+(new Date()).toLocaleString();
+      console.log("done here.");
+    });
+  }
+
+
+  // managing peers and links
   function removeAdzeLink(doc) {
     chrome.runtime.sendMessage({adze: { removeDocument: doc}}, () => {
       restoreManifest();
@@ -93,6 +112,22 @@ const manifestStorage = {
     });
   }
 
+  function renderSingleFeedLink(doc) {
+      var html =[
+        '<li>',
+       //"<span>&#x274C  </span>",//todo; add upvote/downvote buttons here
+        // upvote adze it to your own list of links
+       // gives you the option of following the peer if you aren't already
+        // downvote removes it from your feed, adze it to your list of 'no good'
+       // links, and gives the option of removing that peer
+        '<a href="', doc.url, '">', doc.title,
+        "</a></li>"
+      ].join('');
+      var thisDocElement = htmlToElem(html);
+    return thisDocElement;
+  }
+
+ 
   function renderSingleAdzeLink(doc) {
       var html =[
         '<li>',
@@ -121,6 +156,16 @@ const manifestStorage = {
     return thisDocElement;
   }
 
+  function renderFeed(feedDocsList) {
+    // render links
+    console.log('updating feed!');
+    let linkListDom = document.getElementById("adze-feed-list");
+    linkListDom.innerHTML = '';
+    feedDocsList.map(doc => {
+      linkListDom.appendChild(renderSingleFeedLink(doc));
+    });
+  }
+
   function renderManifest(manifest) {
     document.getElementById("message").innerHTML = JSON.stringify(manifest);
     // render links
@@ -142,6 +187,16 @@ const manifestStorage = {
 
   async function addPeerFromInputBox() {
     let peerAddress = document.getElementById("input-peer-url").value;
+    chrome.runtime.sendMessage({adze: { addPeer: {
+        url: peerAddress,
+        nickname: '(name not fetched yet)'
+      }}}, (manifest) => {
+      renderManifest(manifest);
+    });
+  }
+
+  async function addLinkFromInputBox() {
+    let peerAddress = document.getElementById("input-link-url").value;
     chrome.runtime.sendMessage({adze: { addPeer: {
         url: peerAddress,
         nickname: '(name not fetched yet)'

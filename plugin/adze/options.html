@@ -21,19 +21,39 @@
   </div>
 
   <section class="section is-medium" id="section-feed">
+        <h2 class="title is-2">Adze Feed</h2>
+        <h3 class="subtitle is-3">Links from your Peers</h2>
+        <h6 id="text-feed-updated-timestamp" class="subtitle is-6">Last updated (not sure when)</h2>
+        <div class="field">
+         <div class="control">
+            <a class="button" id="btn-update-feed">Stimulate my brain</a>
+          </div>
+        </div>
+
+        <ul id="adze-feed-list"></ul>
   </section>
   <section class="section is-medium" id="section-links">
     <div>
         <h2 class="title is-2">Adzed Links</h2>
-        <ul id="adze-link-list">
-        </ul>
-    </div>
+        <h3 class="subtitle is-3">Links you are sharing</h2>
+           <div class="control is-expanded">
+
+          <!-- TODO: add ability to add links inside plugin
+                     <input class="input" type="text" id="input-link-url" placeholder="put links to good content here">
+                   </div>
+                   <div class="control">
+                     <a class="button" id="btn-add-link">Adze Link</a>
+                   </div>
+
+            !-->
+                 <ul id="adze-link-list"></ul>
+             </div>
   </section>
 
   <section class="section is-medium" id="section-peers">
       <div>
         <h2 class="title is-2">Adzed Peers</h2>
-        <ul id="adze-peer-list"></ul>
+        <h3 class="subtitle is-3">Peers you are following</h2>
         <div class="field has-addons">
           <div class="control is-expanded">
             <input class="input" type="text" id="input-peer-url" placeholder="put peer url here">
@@ -42,6 +62,7 @@
             <a class="button" id="btn-add-peer">Adze Peer</a>
           </div>
         </div>
+        <ul id="adze-peer-list"></ul>
     </div>
   </section>
 
@@ -51,11 +72,17 @@
   <p id="message"></p>
 
   <h3 class="title is-3">For Uploadin'</h3>
+
       <div id="github-upload-form" style="visbility:hidden">
-          <button id="github-upload-button">Upload</button>
+        <div class="field">
+         <div class="control">
+            <a class="button" id="btn-upload-github">Upload</a>
+          </div>
+        </div>
+   
       </div>
       <div id="github-credentials-needed-form">
-        <p>You'll need a github account and personal access auth token.<br> Follow the 
+        <p>You'll need a github account and personal access auth token.  Follow the 
         <a href="https://github.com/settings/tokens/new">instructions here</a>. Make sure it has the 'gists' permission.
         </p>
           <form id="github-token-form">
