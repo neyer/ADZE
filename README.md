@@ -27,7 +27,7 @@ The quality of content you consume will ultimately depend on the goals in that r
 
 The adze insight is this: who knows what you like, better than you do? The only reasonable answer here is 'people whose judgement you've decided you trust'. The insight behind adze  is that 'people with taste that i like' will reliably provide me with better content than some ML algorithm run by some company, which is ultimately trying to get me to buy stuff, either from them or a third party.
 
-Adze reverses the 'collect everything, rank remotely' paradigm. ADZE users share only _good_ content they find, with their networks. Good content can be direct links to other content, but it can also be 'adze peers with good content'. 
+Adze reverses the 'collect everything, rank remotely' paradigm. ADZE users share only _good_ content they find, with their networks. Good content can be direct links to other content, but it can also be 'adze peers with good content'.  The long term vision is that all ranking will be done _locally_, by adze peers cultivating lists of peers who have decent taste, noting spammers as such, and even customizing the logic used to select content from their list of peers. In the limit, the adze vision is for each person to have their own values system expressed in code, running on a machine that they personally own and have root access over. The alternative, is, i think, a much darker future that is incompatible with liberalism becuase it replaces individual humans making choices in line with their individual values, with machines making most choices on behalf of their owners.
 
 The process works like this. Each adze use will:
 
