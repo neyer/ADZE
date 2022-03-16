@@ -89,6 +89,14 @@ async function addDocToList(doc) {
   var manifest = await getStoredManifest();
   manifest.content.sites.push(doc);
   manifestStorage.set(manifest);
+
+  // update the manifest if relevant
+  const storedCredentials = await getStoredCredentials();
+  if (typeof storedCredentials.github !== 'undefined' &&
+      typeof storedCredentials.github.userName !== 'undefined' &&
+      typeof storedCredentials.github.authToken !== 'undefined') {
+    await uploadManifestToGithub(storedCredentials.github);
+  }
   return manifest;
 }
 

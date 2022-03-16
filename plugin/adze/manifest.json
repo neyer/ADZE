@@ -1,5 +1,6 @@
 {
   "name": "ADZE",
+  "description": "ADZE Relevance Protocol. Share links with your friends.",
   "version": "0.1",
   "manifest_version": 3,
   "action": {
