@@ -29,11 +29,17 @@ The adze insight is this: who knows what you like, better than you do? The only 
 
 Adze reverses the 'collect everything, rank remotely' paradigm. ADZE users share only _good_ content they find, with their networks. Good content can be direct links to other content, but it can also be 'adze peers with good content'.  The long term vision is that all ranking will be done _locally_, by adze peers cultivating lists of peers who have decent taste, noting spammers as such, and even customizing the logic used to select content from their list of peers. In the limit, the adze vision is for each person to have their own values system expressed in code, running on a machine that they personally own and have root access over. The alternative, is, i think, a much darker future that is incompatible with liberalism becuase it replaces individual humans making choices in line with their individual values, with machines making most choices on behalf of their owners.
 
-The process works like this. Each adze use will:
+# How do I use this?
+* install the browser plugin located here - you'll need to 'load an unpacked extension'
+* use the plugin to 'adze' sites that you like, by clicking the button the extension adds to your browser:
+* ![Adze icon](https://imgur.com/qJb9YAm)
+* the plugin will publish a list of the links you've rated, on the web where others can see it. You'll need to configure it first.
+* right click that icon to pull up an 'options' page, and add a github user auth token on the 'setup' tab
+* ![Adze setup page](https://imgur.com/yCrZHza)
+* this will give you a url which contains a list of links you like. share this with your friends, especially me.
+* 'adze' your friends' links in the 'my peers' tab of the plugin's options page
+* use the 'feed' page in the options page to consume the content of yours
 
-* 'adze' sites they like, to their list of good links
-* publish their list rated links, on the web where others can see it
-* 'adze' their friends' published lists
-* use a page in their local browser to consume the content of their friends lists, and those friends' lists, and those friend's lists, etc
+Soon it will consume content from your friends' of friends lists, and those friends' lists, and those friend's lists, etc
 
-The  'downloading your friednds lists' stuff is still a work in progress right now.
+The goal is to make create a network of revalance signals, exchanged among peers who trust each other, so that we can eventually index everything worth indexing on the web. As new links are added by peers, they'll show up in your feed. We are in the stage of 'seeding the network' right now.  Think of yourself as an early pioneer in what may be a very exciting future of the web. Make the web weird again!
