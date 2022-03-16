@@ -32,10 +32,12 @@ Adze reverses the 'collect everything, rank remotely' paradigm. ADZE users share
 # How do I use this?
 * install the browser plugin located here - you'll need to 'load an unpacked extension'
 * use the plugin to 'adze' sites that you like, by clicking the button the extension adds to your browser:
-* ![Adze icon](https://imgur.com/qJb9YAm)
+
+ ![Adze icon](https://i.imgur.com/qJb9YAm.png)
 * the plugin will publish a list of the links you've rated, on the web where others can see it. You'll need to configure it first.
 * right click that icon to pull up an 'options' page, and add a github user auth token on the 'setup' tab
-* ![Adze setup page](https://imgur.com/yCrZHza)
+
+ ![Adze setup page](https://i.imgur.com/yCrZHza.png)
 * this will give you a url which contains a list of links you like. share this with your friends, especially me.
 * 'adze' your friends' links in the 'my peers' tab of the plugin's options page
 * use the 'feed' page in the options page to consume the content of yours
