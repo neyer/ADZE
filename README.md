@@ -9,25 +9,7 @@ Adze (sounds like 'ads') is a protocol that rides on top of HTTP. Adze peers exc
 
 The result is something like an easily hackable, totally decentralized link-sharing network, which, in the limit of many many people using adze, could evolve into a decentralized search engine.
 
-Instead of one monster index for the whole internet, owned by a giant corporation for make great sharehodler value, the adze vision is millions of peers constructing their own tiny indices of content they personally like, with peers finding each other recursively through existing relationships. If you wanted to find a great camera in real life, before search engines were a thing, you might have asked a friend who's really into photography for a recommendation. They, in turn, might consult their network. Adze recaptures this formula, and makes it scale to the whole web. 
-
-This is the first step in a much broader vision, of a "distributed sensemaking apparatus" that dramatically lowers the cost of social reasoning, using identity as a bullshit filter. If someone starts being spammy in adze, all you have to do is drop them from your peers list. Better yet, you might adze them to a 'spammy peers' list, so that your friends don't have to deal with their nonsense either. 
-
-A browser plugin is in this repo, showing how this all fits together. It runs on chrome and brave browsers.
-
-# What?
-
-Think of it this way: all kinds of sites on the internet follow a pattern like this:
-
-A  "relevance service" operator (i.e. a social network, a search engine, a massive online vendor that rhymes with 'slam a bong'):
-* collects some pile of content,  or, in the case of search engines, indexes the entire web
-* shows people stuff from that content based upon some ranking engine.
-
-The quality of content you consume will ultimately depend on the goals in that ranking engine. But running a big service operator is expensive, which means the goal of the ranking engine is not to give you what you _really_ want - it's to give you stuff that maximizes the shareholder value of the giant service operator. Results that scare, frighten, or bait you into coming back, over and over - these are great for sharehodler value, but not so much for you. In the words of [David Foster Wallace](https://www.youtube.com/watch?v=OsAd4HGJS4o&t=750s), the work of choosing is an essential act for a healthy, content mind.
-
-The adze insight is this: who knows what you like, better than you do? The only reasonable answer here is 'people whose judgement you've decided you trust'. The insight behind adze  is that 'people with taste that i like' will reliably provide me with better content than some ML algorithm run by some company, which is ultimately trying to get me to buy stuff, either from them or a third party.
-
-Adze reverses the 'collect everything, rank remotely' paradigm. ADZE users share only _good_ content they find, with their networks. Good content can be direct links to other content, but it can also be 'adze peers with good content'.  The long term vision is that all ranking will be done _locally_, by adze peers cultivating lists of peers who have decent taste, noting spammers as such, and even customizing the logic used to select content from their list of peers. In the limit, the adze vision is for each person to have their own values system expressed in code, running on a machine that they personally own and have root access over. The alternative, is, i think, a much darker future that is incompatible with liberalism becuase it replaces individual humans making choices in line with their individual values, with machines making most choices on behalf of their owners.
+See [the website](https://www.adze.network/) for more details.
 
 # How do I use this?
 * install the browser plugin located here - you'll need to 'load an unpacked extension'
