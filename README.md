@@ -12,7 +12,7 @@ The result is something like an easily hackable, totally decentralized link-shar
 See [the website](https://www.adze.network/) for more details.
 
 # How do I use this?
-* install the browser plugin located here - you'll need to 'load an unpacked extension'
+* install the browser plugin located here - you'll need to 'load an unpacked extension' (working on getting approval from google to add it to the chrome marketplace)
 * use the plugin to 'adze' sites that you like, by clicking the button the extension adds to your browser:
 
  ![Adze icon](https://i.imgur.com/qJb9YAm.png)
