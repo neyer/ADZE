@@ -64,23 +64,64 @@ async function updatePeerManifestCache() {
 function flattenPeerLinksList(peerManifestCache) {
   // combines links from multuple peers into a single feed
   // for now all we are doing is  putting them in whatever order they are
+  // not doing any deduplicatoin
   // todo: eventually give way more options for sorting/scoring
   var linksList = []
   for (var key in peerManifestCache.peers) {
     var thisPeerManifest = peerManifestCache.peers[key]
     thisPeerManifest.content.sites.map((doc) => {
+      doc.provenance = { sharers: [thisPeerManifest.meta.username] };
       linksList.push(doc);
     });
   }
   return linksList;
 }
 
+// todo: resolve mismatches between titles here
+// todo: add assertion that urls match
+function mergeFeedDocs(firstDoc, toMerge) {
+  firstDoc.timestamp = Math.max(firstDoc.timestamp_ms, toMerge.timestamp_ms);
+  firstDoc.provenance.sharers =  [].concat(firstDoc.provenance.sharers, toMerge.provenance.sharers);
+  
+  return firstDoc;
+}
+
+// Takes a flattend links list and combines mutiple referalls for the same site into one
+function mergePeerLinksList (linksList) {
+  let siteIndex = {};
+
+  linksList.map((doc) => {
+    if (typeof siteIndex[doc.url] === 'undefined') {
+        // it's new, add it to the resutls list
+        siteIndex[doc.url] = doc;
+    } else {
+      // someone else already shared this. Marge the result
+        siteIndex[doc.url] = mergeFeedDocs(siteIndex[doc.url],doc);
+    }
+  });
+  // lastly return the keys
+  let resultList = [];
+  for (var siteKey in siteIndex) {
+    resultList.push(siteIndex[siteKey]);
+  }
+  return resultList;
+}
+
+// sorts a list of peer links according to how many peers adzed it
+// TODO: WAY more options here
+function sortPeerLinksList(linksList) {
+  linksList.sort(function (docA, docB) {
+    return docB.provenance.sharers.length - docA.provenance.sharers.length;
+  });
+}
+
 async function updateFeed() {
   var manifest = await getStoredManifest();
-  var peerCache = await updatePeerManifestCache();
   // update the list of all cached content from the peers
-  // todo: make this show peers' sites instead
-  return flattenPeerLinksList(peerCache);
+  var peerCache = await updatePeerManifestCache();
+  var mergedLinks =  mergePeerLinksList(flattenPeerLinksList(peerCache));
+  sortPeerLinksList(mergedLinks);
+  return mergedLinks;
 }
 
 
@@ -170,12 +211,17 @@ async function removePeerFromList(peer) {
 
 function makeManifestWithoutPeer(oldManifest, toRemove) {
   var newManifest = makeNewManifest();
+  // don't start with that default manifest in there.
+  newManifest.content.peers = [];
   newManifest.meta = oldManifest.meta;
   newManifest.content.sites = oldManifest.content.sites;
   
   for(let index in oldManifest.content.peers){
     var thisPeer = oldManifest.content.peers[index];
     if (thisPeer.url != toRemove.url) {
+      console.log("keeping this peer around");
+      console.log(thisPeer.url);
+      console.log(toRemove.url);
       newManifest.content.peers.push(thisPeer);
     }
   }

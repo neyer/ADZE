@@ -101,8 +101,13 @@
        // gives you the option of following the peer if you aren't already
         // downvote removes it from your feed, adze it to your list of 'no good'
        // links, and gives the option of removing that peer
+        '<div class="columns">',
+        '<div class="column is-half">',
         '<a href="', doc.url, '">', doc.title,
-        "</a></li>"
+        "</a></div>",
+        '<div class="column is-one-third">'+JSON.stringify(doc.provenance)+'</div>',
+        '<div class="column">(feedback will go here)</div>',
+        "</div></li>"
       ].join('');
       var thisDocElement = htmlToElem(html);
     return thisDocElement;
