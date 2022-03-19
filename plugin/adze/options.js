@@ -75,7 +75,6 @@
       renderFeed(feedDocs);
       document.getElementById("text-feed-updated-timestamp").innerHTML = 
         "Last updated "+(new Date()).toLocaleString();
-      console.log("done here.");
     });
   }
 
@@ -93,6 +92,44 @@
     });
   }
 
+  ////////////////////////////////////////////////////////////
+  // Render the feed
+  ////////////////////////////////////////////////////////////
+
+  // describes the provenance of a single recommended link
+  // why is this in the feed, where it is?
+  // for now, say who recommended this and their social distance
+  function renderProvenanceHtml(provenance) {
+     // who as adzed this lnk
+     var adzeCountByOrder = [0,0,0,0,0];
+     provenance.sharers.map((sharer) => {
+        ++adzeCountByOrder[sharer.order];
+     });
+  
+    let resultStrings = [ "Shared by "];
+    let hasAddedSharers = false;
+    for (var peerOrder = 0; peerOrder < 4; ++ peerOrder) {
+       var sharesByPeersOfThisOrder = adzeCountByOrder[peerOrder];
+       if (sharesByPeersOfThisOrder > 0)  {
+          if (hasAddedSharers) {
+            resultStrings.push(", ");
+          }
+          var thisDesc = sharesByPeersOfThisOrder.toString() + " order "  + 
+              peerOrder.toString() + " peer";
+          if (peerOrder == 1){ 
+              thisDesc =  sharesByPeersOfThisOrder.toString() + " of your peers";
+          } else if  (sharesByPeersOfThisOrder > 1) {
+            thisDesc += 's';
+          }
+          
+          resultStrings.push(thisDesc);
+          hasAddedSharers = true;
+       }
+    }
+    return resultStrings.join('');
+  }
+
+
   function renderSingleFeedLink(doc) {
       var html =[
         '<li>',
@@ -105,7 +142,7 @@
         '<div class="column is-half">',
         '<a href="', doc.url, '">', doc.title,
         "</a></div>",
-        '<div class="column is-one-third">'+JSON.stringify(doc.provenance)+'</div>',
+        '<div class="column is-one-third">'+renderProvenanceHtml(doc.provenance)+'</div>',
         '<div class="column">(feedback will go here)</div>',
         "</div></li>"
       ].join('');
@@ -144,7 +181,6 @@
 
   function renderFeed(feedDocsList) {
     // render links
-    console.log('updating feed!');
     let linkListDom = document.getElementById("adze-feed-list");
     linkListDom.innerHTML = '';
     feedDocsList.map(doc => {

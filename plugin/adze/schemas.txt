@@ -1,0 +1,17 @@
+// todo: how do peopel normally represent a json schema?
+
+Manifest: {
+  meta: MetaDoc
+  content: ContentDoc
+  order: Optional[str], "number descrbing how many hops away the peer owning this manifest is. Used when other peer's peers are returned"
+}
+
+
+ContentDoc { 
+  sites: List[Site]
+  peers: List[Peer]
+}
+Peer: {
+  url: str,"web url of peer"
+  nickname: str, "string desc, more like alias than username",
+}

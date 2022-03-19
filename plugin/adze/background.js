@@ -39,7 +39,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true;
 });
 
+////////////////////////////////////////////////////////////////////////////////
 // Feed
+////////////////////////////////////////////////////////////////////////////////
 const MANIFEST_CACHE_PEER =  'adzePeerManifestCache';
 function makeNewCache() { 
   return{
@@ -47,17 +49,47 @@ function makeNewCache() {
     peers: []
   };
 }
-async function updatePeerManifestCache() {
+async function updatePeerManifestCache(numTimesToFollow) {
   var localManifest = await getStoredManifest();
   // todo: have this load from stored value to update rether than make a new one
   var currentCache = makeNewCache();
   // update the list of all cached content from the peers
+  var peersSeenSoFar = {};
+  var toVisit = [];
+  var toVisitNext = [];
+  var thisPeerOrder = 1;
+  // make a plan to visit all the local peers
   for (var peerNo in localManifest.content.peers) {
     var peer = localManifest.content.peers[peerNo];
-    var thisPeerManifest = await getPeerManifest(peer.url);
-    currentCache.peers.push(thisPeerManifest);
+    peersSeenSoFar[peer.url] = true;
+    toVisit.push(peer);
   }
-    // todo: save this cache
+
+  while (numTimesToFollow > 0) {
+      for (var peerNo in toVisit) {
+        var peer = toVisit[peerNo];
+        var thisPeerManifest = await getPeerManifest(peer.url);
+        peersSeenSoFar[peer.url] = true;
+        thisPeerManifest.meta.order = thisPeerOrder;
+        currentCache.peers.push(thisPeerManifest);
+        // now add this peer's remote peers to visit next
+        for (var remotePeerNum in thisPeerManifest.content.peers) {
+           var thisRemotePeer = thisPeerManifest.content.peers[remotePeerNum];
+          // don't visit this peer twice
+          if (typeof peersSeenSoFar[thisRemotePeer.url] === 'undefined') {
+              // we will visit this peer if we traverse more hops
+              peersSeenSoFar[thisRemotePeer.url] = true;
+              toVisitNext.push(thisRemotePeer);
+          }
+      } // we've considered whether to visit all order n+1 peers of this order n peer
+    }
+    // we've followed the links once. Decrement counters, reset lets, etc.
+    ++thisPeerOrder;
+    --numTimesToFollow;
+    toVisit = toVisitNext;
+    toVisitNext = [];
+  }
+  // todo: save this cache
   return currentCache;
 }
 
@@ -70,7 +102,7 @@ function flattenPeerLinksList(peerManifestCache) {
   for (var key in peerManifestCache.peers) {
     var thisPeerManifest = peerManifestCache.peers[key]
     thisPeerManifest.content.sites.map((doc) => {
-      doc.provenance = { sharers: [thisPeerManifest.meta.username] };
+      doc.provenance = { sharers: [ thisPeerManifest.meta ] };
       linksList.push(doc);
     });
   }
@@ -118,7 +150,12 @@ function sortPeerLinksList(linksList) {
 async function updateFeed() {
   var manifest = await getStoredManifest();
   // update the list of all cached content from the peers
-  var peerCache = await updatePeerManifestCache();
+  // how many times should we follow peers?
+  // 1 hop: only local peers added by this maniest
+  // 2 hops: add 'peers of peers', i.e. order 2 peers
+  // todo: make this configurable, dynamic
+  var numPeerHops = 2;
+  var peerCache = await updatePeerManifestCache(numPeerHops);
   var mergedLinks =  mergePeerLinksList(flattenPeerLinksList(peerCache));
   sortPeerLinksList(mergedLinks);
   return mergedLinks;
