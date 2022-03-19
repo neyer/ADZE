@@ -99,14 +99,14 @@
   // describes the provenance of a single recommended link
   // why is this in the feed, where it is?
   // for now, say who recommended this and their social distance
-  function renderProvenanceHtml(provenance) {
+  function renderProvenanceSummaryHtml(provenance) {
      // who as adzed this lnk
      var adzeCountByOrder = [0,0,0,0,0];
      provenance.sharers.map((sharer) => {
         ++adzeCountByOrder[sharer.order];
      });
   
-    let resultStrings = [ "Shared by "];
+    let resultStrings = [ '<span class="btn-see-provenance">&#x1F50D</span>'," Shared by "];
     let hasAddedSharers = false;
     for (var peerOrder = 0; peerOrder < 4; ++ peerOrder) {
        var sharesByPeersOfThisOrder = adzeCountByOrder[peerOrder];
@@ -129,24 +129,63 @@
     return resultStrings.join('');
   }
 
+  // TODO: this coudld use more work here.
+  // Ideally, we could have more options, and show the provenance path
+  // rather than just the order
+  function renderProvenanceDetails(provenance) {
+     // who as adzed this lnk
+     provenance.sharers.sort(function(a,b) {
+          return a.order - b.order;
+     });
+  
+    let resultStrings = [ 'Shared by:<ul>' ];
+    provenance.sharers.map ((sharer, index) => {
+      if (sharer.order == 1) {
+          // if they are already a peer, we don't add the link;
+         resultStrings.push(["<li>", sharer.nickname, " (your peer)</li>"].join(''));
+      } else {
+       var thisPeerDescStrings = [
+         "<li>", sharer.nickname,
+          ", an order ", sharer.order.toString(), " peer.",
+         "<a class=\"link-adze-remote-peer\" data-peer-meta='",
+          JSON.stringify(sharer),
+         "'> Adze Them.</a>", 
+         "</li>"
+       ];
+       resultStrings.push(thisPeerDescStrings.join(''));
+      }
+    });
+    resultStrings.push('</ul>');
+    return resultStrings.join('');
+  }
+
 
   function renderSingleFeedLink(doc) {
       var html =[
         '<li>',
-       //"<span>&#x274C  </span>",//todo; add upvote/downvote buttons here
         // upvote adze it to your own list of links
        // gives you the option of following the peer if you aren't already
         // downvote removes it from your feed, adze it to your list of 'no good'
        // links, and gives the option of removing that peer
         '<div class="columns">',
-        '<div class="column is-half">',
+        '<div class="column is-two-fifths">',
         '<a href="', doc.url, '">', doc.title,
         "</a></div>",
-        '<div class="column is-one-third">'+renderProvenanceHtml(doc.provenance)+'</div>',
+        '<div class="column is-two-fifths area-provenance-details">'+renderProvenanceSummaryHtml(doc.provenance)+'</div>',
         '<div class="column">(feedback will go here)</div>',
         "</div></li>"
       ].join('');
       var thisDocElement = htmlToElem(html);
+      var provenanceDetailsArea = thisDocElement.querySelector(".area-provenance-details");
+      thisDocElement.querySelector('.btn-see-provenance').addEventListener('click', () => {
+        provenanceDetailsArea.innerHTML = renderProvenanceDetails(doc.provenance);
+        provenanceDetailsArea.querySelector('a.link-adze-remote-peer').addEventListener('click', (event) =>{ 
+          var remotePeerDoc = JSON.parse(event.srcElement.attributes['data-peer-meta'].value);
+          addPeer(remotePeerDoc).then((manifest) => {
+            renderManifest(manifest);
+          });
+      });
+     });
     return thisDocElement;
   }
 
@@ -209,23 +248,21 @@
 
   async function addPeerFromInputBox() {
     let peerAddress = document.getElementById("input-peer-url").value;
-    chrome.runtime.sendMessage({adze: { addPeer: {
+    let peerDesc = {
         url: peerAddress,
         nickname: '(name not fetched yet)'
-      }}}, (manifest) => {
+    };
+    await addPeer(peerDesc);
+  }
+
+  async function addPeer(peerDesc) {
+    chrome.runtime.sendMessage({adze: { addPeer: peerDesc } }, (manifest) => {
       renderManifest(manifest);
     });
   }
 
   async function addLinkFromInputBox() {
-    let peerAddress = document.getElementById("input-link-url").value;
-    chrome.runtime.sendMessage({adze: { addPeer: {
-        url: peerAddress,
-        nickname: '(name not fetched yet)'
-      }}}, (manifest) => {
-      renderManifest(manifest);
-    });
- 
+    // TODO
   }
 
   // credential management

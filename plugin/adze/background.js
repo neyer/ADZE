@@ -71,6 +71,7 @@ async function updatePeerManifestCache(numTimesToFollow) {
         var thisPeerManifest = await getPeerManifest(peer.url);
         peersSeenSoFar[peer.url] = true;
         thisPeerManifest.meta.order = thisPeerOrder;
+        thisPeerManifest.meta.url = peer.url;
         currentCache.peers.push(thisPeerManifest);
         // now add this peer's remote peers to visit next
         for (var remotePeerNum in thisPeerManifest.content.peers) {
@@ -232,7 +233,7 @@ async function addPeerToList(peer) {
   }
 
   var peerManifest = await getPeerManifest(peer.url);
-  peer.nickname = peerManifest.meta.username;
+  peer.nickname = peerManifest.meta.nickname || peerManifest.meta.username;
 
   manifest.content.peers.push(peer);
   manifestStorage.set(manifest);
@@ -285,7 +286,7 @@ const manifestStorage = {
 
 function makeNewManifest() {
    return {
-     "meta": { "username": "uknown"},
+     "meta": { "nickname": "uknown"},
      "content" : {
         "sites": [],
         "peers": [
@@ -452,9 +453,9 @@ async function uploadManifestToGithub(uploadRequest) {
     manifestUrl: uploadUrl,
     gistId: response_json.id
   } }
-  // update the manifest with a username if necessary
-  if (typeof storedManifest.meta.username === 'undefined') {
-    storedManifest.meta.username = uploadRequest.userName;
+  // update the manifest with a nickname if necessary
+  if (typeof storedManifest.meta.nickname === 'undefined') {
+    storedManifest.meta.nickname = uploadRequest.userName;
     storedManifest.content.peers = [];
     await saveManifest(storedManifest);
   } 
