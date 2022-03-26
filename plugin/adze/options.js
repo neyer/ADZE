@@ -5,14 +5,15 @@
    document.getElementById("btn-update-feed").addEventListener("click", updateFeed);
 
 
-    document.getElementById("btn-upload-github").addEventListener("click", uploadManifestToGithub);
+    document.getElementById("btn-upload-hub").addEventListener("click", uploadManifest);
+    document.getElementById("btn-set-hub-credentials").addEventListener("click", setHubCredentials);
 
     document.getElementById("btn-add-peer").addEventListener("click", addPeerFromInputBox);
     //TODO: fetch the document and get the title
     // move that logic into background.js
     //document.getElementById("btn-add-link").addEventListener("click", addLinkFromInputBox);
     setupTabs();
-    setActiveTab('feed');
+    setActiveTab('setup');
     restoreManifest();
     restoreCredentials();
     updateFeed();
@@ -29,9 +30,9 @@
   }
 
   function restoreCredentials() {
-    chrome.runtime.sendMessage({adze: { getGithubCredentials: {}}}, (response) => {
+    chrome.runtime.sendMessage({adze: { getHubCredentials: {}}}, (response) => {
       if (response.hasAuthToken) {
-        setGithubCredentials(response);
+        renderHubCredentials(response);
       }
     });
   }
@@ -62,12 +63,26 @@
     document.getElementById("section-"+tabName).style = "";
   }
 
+//////////////////////////////////////////////////////////////////////
+// HTML tools
+//////////////////////////////////////////////////////////////////////
   function htmlToElem(html) {
     let temp = document.createElement('template');
     html = html.trim(); // Never return a space text node as a result
     temp.innerHTML = html;
     return temp.content.firstChild;
   }
+  function setElementValueIfDefined(elementId, value)  {
+      if (typeof value !== 'undefined') {
+        document.getElementById(elementId).value = value;
+      } else {
+        document.getElementById(elementId).value = '';
+      }
+  }
+//////////////////////////////////////////////////////////////////////
+// Mutations Mutations Mutations Mutations 
+//////////////////////////////////////////////////////////////////////
+
 
   // feed stuff
   function updateFeed() {
@@ -265,25 +280,22 @@
     // TODO
   }
 
+  /////////////////////////////////////////////////////////////////////////////
   // credential management
-  async function uploadManifestToGithub() {
+  /////////////////////////////////////////////////////////////////////////////
+  async function uploadManifest() {
     console.log('uploading');
 
-    const authToken = document.getElementById("github-auth-token").value;
-    const userName = document.getElementById("github-user-name").value;
-    chrome.runtime.sendMessage({adze: { uploadToGithub: {
-        authToken: authToken,
-        userName: userName,
-      }}}, (uploadDestination) => {
+    chrome.runtime.sendMessage({adze: { uploadToHub: {} }}, (uploadDestination) => {
       shareUploadLink(uploadDestination);
     });
   }
 
   function shareUploadLink(uploadDestination) {
       var html =[
-        "<span>ADZE list uploaded to ",
+        "<span>Your recommendatdions have been uploaded to ",
         '<a href="', uploadDestination, '">', uploadDestination,
-        "</a> Share it with your friends!",
+        "</a> Share them with your friends!",
         "</span>"
       ].join('');
 
@@ -292,12 +304,30 @@
       messageDom.appendChild(htmlToElem(html));
   }
 
-  function setGithubCredentials(credentials) {
-    document.getElementById("github-auth-token").value = credentials.authToken;
-    document.getElementById("github-user-name").value = credentials.userName;
+  function setHubCredentials() {
+    const desiredCredentials = {
+      hubAddress: document.getElementById("hub-address").value,
+      username: document.getElementById("hub-username").value,
+      email: document.getElementById("hub-email").value,
+    };
 
-    if (credentials.url && credentials.url.startsWith('http')) {
-      shareUploadLink(credentials.url);
+    chrome.runtime.sendMessage({adze: { setHubCredentials: desiredCredentials }}, (credentials) => {
+      renderHubCredentials(credentials);
+    });
+  }
+
+  function renderHubCredentials(credentials) {
+    if (typeof credentials.errorMessage !== 'undefined')  {
+        const innerHtml = ["<p class=\"help is-danger\">", credentials.errorMessage, "</p>"].join('');
+        document.getElementById("hub-credentials-form-message").innerHTML = innerHtml;
+    }
+
+    setElementValueIfDefined("hub-address", credentials.hubAddress);
+    setElementValueIfDefined("hub-username", credentials.username);
+    setElementValueIfDefined("hub-email", credentials.email);
+
+    if (credentials.manifestUrl && credentials.manifestUrl.startsWith('http')) {
+      shareUploadLink(credentials.manifestUrl);
     }
   }
   

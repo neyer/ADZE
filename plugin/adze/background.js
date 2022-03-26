@@ -28,10 +28,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }  else if (request.adze.removePeer) {
     removePeerFromList(request.adze.removePeer).then(sendResult);
   // Uploading
-  } else if (request.adze.getGithubCredentials) {
-    getGithubCredentials(request.adze.getGithubCredentials).then(sendResult);
-  } else if (request.adze.uploadToGithub) {
-    uploadManifestToGithub(request.adze.uploadToGithub).then(sendResult);
+  } else if (request.adze.getHubCredentials) {
+    getStoredCredentials(request.adze.getStoredCredentials).then(sendResult);
+  } else if (request.adze.setHubCredentials) {
+    setHubCredentials(request.adze.setHubCredentials).then(sendResult);
+  } else if (request.adze.uploadToHub) {
+    uploadManifestToHub(request.adze.uploadToHub).then(sendResult);
   }
   // This tells the runtime, 'yes we will return a response'.
   // if you dont' do this here, the runtime will drop the connection
@@ -169,13 +171,6 @@ async function addDocToList(doc) {
   manifest.content.sites.push(doc);
   manifestStorage.set(manifest);
 
-  // update the manifest if relevant
-  const storedCredentials = await getStoredCredentials();
-  if (typeof storedCredentials.github !== 'undefined' &&
-      typeof storedCredentials.github.userName !== 'undefined' &&
-      typeof storedCredentials.github.authToken !== 'undefined') {
-    await uploadManifestToGithub(storedCredentials.github);
-  }
   return manifest;
 }
 
@@ -257,9 +252,6 @@ function makeManifestWithoutPeer(oldManifest, toRemove) {
   for(let index in oldManifest.content.peers){
     var thisPeer = oldManifest.content.peers[index];
     if (thisPeer.url != toRemove.url) {
-      console.log("keeping this peer around");
-      console.log(thisPeer.url);
-      console.log(toRemove.url);
       newManifest.content.peers.push(thisPeer);
     }
   }
@@ -272,7 +264,9 @@ const manifestStorage = {
     chrome.storage.local.get(['manifest'], (result) => {
       storedValue = result.manifest;
       if (typeof storedValue === 'undefined') {
-        cb(makeNewManifest());
+        // if there is no manifest there, make a new one with the 
+       // adze creator's list as a recommended start point
+        cb(makeNewManifest(true));
       } else {
         return cb(JSON.parse(storedValue));
       }
@@ -284,18 +278,23 @@ const manifestStorage = {
 };
 
 
-function makeNewManifest() {
-   return {
+function makeNewManifest(addCreator) {
+   var result = {
      "meta": { "nickname": "uknown"},
      "content" : {
         "sites": [],
         "peers": [
-          {"url":"https://gist.githubusercontent.com/neyer/780867d03c8764e58c8f5e8396df5c7f/raw/cfe6a124d3e2a282a1e9f0e7d8432fe1c3334e60/adze-manifest.json",
-          "nickname" : "axphard (adze creator)"
-          }
+          
          ]
       }
    };
+
+  if (addCreator) {
+      result.content.peers.push( 
+        {"url":"peers.adze.network/apxhard",
+        "nickname" : "axphard (adze creator)" });
+  }
+  return result;
 }
 
 function isValidManfest() {
@@ -364,7 +363,9 @@ function saveManifest(manifest) {
   });
 }
 
+////////////////////////////////////////////////////////////////////////////////
 // Credentials
+////////////////////////////////////////////////////////////////////////////////
 function getStoredCredentials() {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
@@ -380,7 +381,38 @@ function getStoredCredentials() {
   });
 }
 
+// validate the credentials against thehub
+async function setHubCredentials(credentials) {
+  var hubRegisterUrl = credentials.hubAddress + "register";
+  console.log("Sending register request to "+hubRegisterUrl)
+
+  // if we are patching an existing gist we use the PATCH method
+  // and add the id of the existing gist
+  // use basic authentication
+  const response = await fetch(hubRegisterUrl, {
+    body: new URLSearchParams({
+      username: credentials.username,
+      email: credentials.email,
+    }),
+    method: 'POST',
+  });
+  var response_json = await response.json();
+  console.log(response_json)
+
+  if (response_json.result == 'success') {
+    credentials.manifestUrl = response_json.manifest_url;
+    credentials.authToken = response_json.authToken;
+    // now save these
+    await saveCredentials(credentials);
+  } else {
+    credentials.errorMessage = response_json.message;
+  }
+  return credentials;
+}
+
+
 function saveCredentials(credentials) {
+  //
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
     // Asynchronously fetch all data from storage.sync.
@@ -394,21 +426,10 @@ function saveCredentials(credentials) {
     });
   });
 }
-async function getGithubCredentials(credentialRequest) {
-    const storedValue = await getStoredCredentials();
-    if (!(typeof storedValue === 'undefined' ||
-          typeof storedValue.github === 'undefined')) {
-        return {hasAuthToken:true, 
-                authToken: storedValue.github.authToken,
-                userName: storedValue.github.userName,
-                url:storedValue.github.manifestUrl};
-   } else {
-     // no user key was found, not a valid request
-     return {hasAuthToken: false};
-   }
-}
 
-
+////////////////////////////////////////////////////////////////////////////////
+// Uploading the manifest
+////////////////////////////////////////////////////////////////////////////////
 async function uploadManifestToGithub(uploadRequest) {
   // we might end up 
   let url = "https://api.github.com/gists";
