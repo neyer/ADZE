@@ -31,9 +31,7 @@
 
   function restoreCredentials() {
     chrome.runtime.sendMessage({adze: { getHubCredentials: {}}}, (response) => {
-      if (response.hasAuthToken) {
-        renderHubCredentials(response);
-      }
+      renderHubCredentials(response);
     });
   }
 
@@ -286,14 +284,20 @@
   async function uploadManifest() {
     console.log('uploading');
 
-    chrome.runtime.sendMessage({adze: { uploadToHub: {} }}, (uploadDestination) => {
-      shareUploadLink(uploadDestination);
+    chrome.runtime.sendMessage({adze: { uploadToHub: {} }}, (responseJson) => {
+      console.log(responseJson);
+      if (responseJson.result != 'success') {
+        renderErrorMessage(responseJson.message);
+        
+      } else {
+        shareUploadLink(responseJson.manifestUrl);
+      }
     });
   }
 
   function shareUploadLink(uploadDestination) {
       var html =[
-        "<span>Your recommendatdions have been uploaded to ",
+        "<span>Your recommendations have been uploaded to ",
         '<a href="', uploadDestination, '">', uploadDestination,
         "</a> Share them with your friends!",
         "</span>"
@@ -315,18 +319,23 @@
       renderHubCredentials(credentials);
     });
   }
+  
+  function renderErrorMessage(message) {
+        const innerHtml = ["<p class=\"help is-danger\">", message, "</p>"].join('');
+        document.getElementById("hub-credentials-form-message").innerHTML = innerHtml;
+  }
+
 
   function renderHubCredentials(credentials) {
     if (typeof credentials.errorMessage !== 'undefined')  {
-        const innerHtml = ["<p class=\"help is-danger\">", credentials.errorMessage, "</p>"].join('');
-        document.getElementById("hub-credentials-form-message").innerHTML = innerHtml;
+        renderErrorMessage(credentials.errorMessage);
     }
 
     setElementValueIfDefined("hub-address", credentials.hubAddress);
     setElementValueIfDefined("hub-username", credentials.username);
     setElementValueIfDefined("hub-email", credentials.email);
 
-    if (credentials.manifestUrl && credentials.manifestUrl.startsWith('http')) {
+    if (credentials.manifestUrl && typeof credentials.manifestUrl != 'undefined') {
       shareUploadLink(credentials.manifestUrl);
     }
   }

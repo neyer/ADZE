@@ -33,7 +33,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.adze.setHubCredentials) {
     setHubCredentials(request.adze.setHubCredentials).then(sendResult);
   } else if (request.adze.uploadToHub) {
-    uploadManifestToHub(request.adze.uploadToHub).then(sendResult);
+    uploadToHub(request.adze.uploadToHub).then(sendResult);
   }
   // This tells the runtime, 'yes we will return a response'.
   // if you dont' do this here, the runtime will drop the connection
@@ -384,11 +384,7 @@ function getStoredCredentials() {
 // validate the credentials against thehub
 async function setHubCredentials(credentials) {
   var hubRegisterUrl = credentials.hubAddress + "register";
-  console.log("Sending register request to "+hubRegisterUrl)
 
-  // if we are patching an existing gist we use the PATCH method
-  // and add the id of the existing gist
-  // use basic authentication
   const response = await fetch(hubRegisterUrl, {
     body: new URLSearchParams({
       username: credentials.username,
@@ -397,10 +393,9 @@ async function setHubCredentials(credentials) {
     method: 'POST',
   });
   var response_json = await response.json();
-  console.log(response_json)
 
   if (response_json.result == 'success') {
-    credentials.manifestUrl = response_json.manifest_url;
+    credentials.manifestUrl = response_json.manifestUrl;
     credentials.authToken = response_json.authToken;
     // now save these
     await saveCredentials(credentials);
@@ -430,57 +425,26 @@ function saveCredentials(credentials) {
 ////////////////////////////////////////////////////////////////////////////////
 // Uploading the manifest
 ////////////////////////////////////////////////////////////////////////////////
-async function uploadManifestToGithub(uploadRequest) {
+async function uploadToHub() {
   // we might end up 
-  let url = "https://api.github.com/gists";
-  const storedManifest = await getStoredManifest();
-  const storedCredentials = await getStoredCredentials();
-  const manifestFileName = 'adze-manifest.json';
+  const manifest = await getStoredManifest();
+  const credentials = await getStoredCredentials();
   // prepare the parameters to the API call
-  let filesDict = {}
-  filesDict[manifestFileName] = { content: JSON.stringify(storedManifest) };
-  const paramsDict = {
-    descripton: 'adze manifest',
-    files:  filesDict,
-    public: true 
-  };
-  // if we are patching an existing gist we use the PATCH method
-  // and add the id of the existing gist
-  if (storedCredentials.github && 
-      typeof storedCredentials.github.gistId !== 'undefined') {
-    var method = "PATCH";
-    url = url + "/" + storedCredentials.github.gistId;
-  } else {
-    var method = "POST";
-  }
+  console.log(credentials);
+  var hubUploadUrl = credentials.hubAddress + "upload-manifest";
 
-  // use basic authentication
-  const username = uploadRequest.userName;
-  const password = uploadRequest.authToken;
-  let headers = new Headers();
-  headers.append(
-    'Authorization', 'Basic '+btoa(username + ":" + password));
-  const response = await fetch(url, {
-    body: JSON.stringify(paramsDict),
-    method: method,
-    headers:headers
+  const response = await fetch(hubUploadUrl, {
+    body: new URLSearchParams({
+      username: credentials.username,
+      auth_token: credentials.authToken,
+      manifest_body: JSON.stringify(manifest),
+    }),
+    method: 'POST',
   });
-  var responseBody = await response.text();
-  response_json = JSON.parse(responseBody);
-  const uploadUrl = response_json.files[manifestFileName].raw_url;
-  const credentialsToSave = { github: {
-    userName: uploadRequest.userName,
-    authToken: uploadRequest.authToken,
-    manifestUrl: uploadUrl,
-    gistId: response_json.id
-  } }
-  // update the manifest with a nickname if necessary
-  if (typeof storedManifest.meta.nickname === 'undefined') {
-    storedManifest.meta.nickname = uploadRequest.userName;
-    storedManifest.content.peers = [];
-    await saveManifest(storedManifest);
-  } 
-  await saveCredentials(credentialsToSave);
-  return uploadUrl;
+  var response_json = await response.json();
+  if (response_json.result == 'success') {
+    response_json.manifestUrl =  credentials.manifestUrl;
+  }
+  return response_json;
 }
 
