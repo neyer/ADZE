@@ -200,7 +200,7 @@ async function removeDocFromList(doc, cb) {
 /// Peers
 async function getPeerManifest(url) {
   const response = await fetch(url, {
-    method: 'GET',
+    method: 'GET'
   });
   var responseBody = await response.text();
   return JSON.parse(responseBody);
