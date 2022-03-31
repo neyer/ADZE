@@ -199,7 +199,8 @@ async function removeDocFromList(doc, cb) {
 
 /// Peers
 async function getPeerManifest(url) {
-  const response = await fetch(url, {
+  var cleanUrl = cleanPeerUrl(url);
+  const response = await fetch(cleanUrl, {
     method: 'GET'
   });
   var responseBody = await response.text();
@@ -215,6 +216,15 @@ function hasPeerAlready(manifest, peer) {
     }
   }
   return false;
+}
+
+// amazon does dumb stuff with 302's if you are using a non-/-terminated url
+// hence this delectable hack
+function cleanPeerUrl(baseUrl) {
+  if (baseUrl.search("//peers.adze.network/") != -1 && !baseUrl.endsWith('/')) {
+    return baseUrl+"/";
+  }
+  return baseUrl;
 }
 
 async function addPeerToList(peer) {
@@ -291,7 +301,7 @@ function makeNewManifest(addCreator) {
 
   if (addCreator) {
       result.content.peers.push( 
-        {"url":"peers.adze.network/apxhard",
+        {"url":"https://peers.adze.network/apxhard/",
         "nickname" : "axphard (adze creator)" });
   }
   return result;
@@ -344,6 +354,12 @@ function getStoredManifest() {
         return reject(chrome.runtime.lastError);
       }
       // Pass the data retrieved from storage down the promise chain.
+      if (typeof result.meta.nickame === 'undefined' && typeof result.meta.username !== 'undefined') {
+        // hacky migration for when this field name changed.
+        // ideally there's a file defining types and doing migrations.
+        result.meta.nickname = result.meta.username;
+        delete result.meta.username;
+      }
       resolve(result);
     });
   });
