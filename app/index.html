@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ADZE Recommendation Network</title>
+  <link rel="stylesheet" href="bulma.css" />
+  <link rel="stylesheet" href="options.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<section class="section">
+  <div class="container">
+  <p class="title">Adze Recommendation Protocol Plugin</p>
+  <p id="upload-message"></p>
+  <div class="tabs is-medium is-centered">
+    <ul>
+      <li class="is-active" id="btn-select-tab-feed"><a>feed</a></li>
+      <li id="btn-select-tab-links"><a>my links</a></li>
+      <li id="btn-select-tab-peers"><a>my peers</a></li>
+      <li id="btn-select-tab-setup"><a>setup</a></li>
+     </ul>
+  </div>
+
+  <div id="section-feed">
+        <h2 class="title is-2">Adze Feed</h2>
+        <h3 class="subtitle is-3">Recommended Links from your Peers</h2>
+        <h6 id="text-feed-updated-timestamp" class="subtitle is-6">Last updated (not sure when)</h2>
+        <div class="field">
+         <div class="control">
+            <a class="button" id="btn-update-feed">Stimulate my brain</a>
+          </div>
+        </div>
+
+        <ul id="adze-feed-list"></ul>
+  </div>
+  <div id="section-links">
+     <h2 class="title is-2">Adzed Links</h2>
+     <h3 class="subtitle is-3">Links you are recommending</h2>
+        <div class="control is-expanded">
+
+       <!-- TODO: add ability to add links inside plugin
+                  <input class="input" type="text" id="input-link-url" placeholder="put links to good content here">
+                </div>
+                <div class="control">
+                  <a class="button" id="btn-add-link">Adze Link</a>
+                </div>
+
+         !-->
+              <ul id="adze-link-list"></ul>
+          </div>
+   </div>
+
+  <div id="section-peers">
+      <div>
+        <h2 class="title is-2">Adzed Peers</h2>
+        <h3 class="subtitle is-3">Peers whose recommendations you are following</h2>
+        <div class="field has-addons">
+          <div class="control is-expanded">
+            <input class="input" type="text" id="input-peer-url" placeholder="put peer url here">
+          </div>
+          <div class="control">
+            <a class="button" id="btn-add-peer">Adze Peer</a>
+          </div>
+        </div>
+        <ul id="adze-peer-list"></ul>
+    </div>
+  </div>
+
+  <div id="section-setup">
+
+    <h3 class="title is-3">For Uploadin'</h3>
+
+       <p id="hub-credentials-form-desc">Adze needs your recommendations to be posted somewhere on the web where any other adze user can read them. To simplify this, you can use recommendation hosting service, called a hub. By default, the plugin uses the adze "origin hub", but anyone can host their own.</p>
+      <section class="section" id="hub-credentials-form">
+          <form id="hub-credentials-form">
+            <div class="field">
+              <label class="label">Hub address</label>
+              <div class="control">
+                  <input class="input" id="hub-address" value="https://adze-web.anvil.app/_/api/"></input>
+              </div>
+              <p class="help">Address of a service that will host your recommendations. The default value is operated by the adze network creator.</p>
+            </div>
+            <div class="field">
+              <label class="label">Hub username</label>
+              <div class="control">
+                  <input class="input" id="hub-username"></input>
+              </div>
+              <p class="help"> Your name on the above adze hub. Pick a new name here to register.</p>
+            </div>
+            <div class="field">
+              <label class="label">Email Address</label>
+              <div class="control">
+                  <input class="input" id="hub-email"></input>
+              </div>
+
+              <p class="help">Optional; the origin hub does not share this, and only uses your email address for recovery. Other hubs may have different policies.</p>
+            </div>
+            <div class="field">
+             <div class="control">
+              <a class="button" id="btn-set-hub-credentials">Confirm hub username</a>
+             </div>
+            </section>
+
+          <p id="hub-credentials-form-message"></p>
+          </form>
+
+    <section class="section" id="hub-upload-form" style="visbility:hidden">
+        <div class="field">
+         <div class="control">
+            <a class="button" id="btn-upload-hub">Upload</a>
+          </div>
+       </div>
+
+  <h3 class="title is-3">For Debuggin'</h3>
+  <p id="message"></p>
+
+
+  </div<
+</div>
+<footer class="footer">
+  <div class="content has-text-centered">
+    <p>
+      <strong>ADZE</strong> by <a href="https://apxhard.com">Mark Neyer</a>. The source code is licensed
+      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. Made with &#x1F497 in Ohio.
+    </p>
+  </div>
+</footer>
+
+</div>
+<script src="background.js"></script>
+<script src="options.js"></script>
+</body>
+</html>
