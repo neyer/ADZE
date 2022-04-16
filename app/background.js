@@ -14,7 +14,7 @@ function makeNewCache() {
   };
 }
 async function updatePeerManifestCache(numTimesToFollow) {
-  var localManifest = getStoredManifest();
+  var localManifest = await getStoredManifest();
   // todo: have this load from stored value to update rether than make a new one
   var currentCache = makeNewCache();
   // update the list of all cached content from the peers
@@ -113,7 +113,7 @@ function sortPeerLinksList(linksList) {
 }
 
 async function updateFeed() {
-  var manifest = getStoredManifest();
+  var manifest = await getStoredManifest();
   // update the list of all cached content from the peers
   // how many times should we follow peers?
   // 1 hop: only local peers added by this maniest
@@ -128,10 +128,22 @@ async function updateFeed() {
 
 
 // Doc (link) management
+async function addLinkToList(linkAddress) {
+  const linkDesc = await getLinkDescription(linkAddress);
+  const docToAdd = {
+    title: linkDesc.title,
+    url: linkAddress,
+    timestamp_ms: Date.now(),
+  }
+  console.log(docToAdd);
+  return await addDocToList(docToAdd);
+}
+
+
 async function addDocToList(doc) {
-  var manifest = getStoredManifest();
+  var manifest = await getStoredManifest();
   manifest.content.sites.push(doc);
-  setLocalStorageValue('manifest', manifest);
+  await saveManifest(manifest);
   return manifest;
 }
 
@@ -151,9 +163,9 @@ function makeManifestWithoutDoc(oldManifest, toRemove) {
 
 
 async function removeDocFromList(doc, cb) {
-  var manifest = getStoredManifest();
+  var manifest = await getStoredManifest();
   var newManifest = makeManifestWithoutDoc(manifest, doc);
-  setLocalStorageValue('manifest', newManifest);
+  saveManifest(newManifest);
   return newManifest;
 }
 
@@ -189,7 +201,7 @@ function cleanPeerUrl(baseUrl) {
 }
 
 async function addPeerToList(peer) {
-  var manifest = getStoredManifest();
+  var manifest = await getStoredManifest();
 
   if (hasPeerAlready(manifest, peer)) {
       console.log("Peer "+peer.url+" already exists!");
@@ -207,7 +219,7 @@ async function addPeerToList(peer) {
 }
 
 async function removePeerFromList(peer) {
-  var manifest = getStoredManifest();
+  var manifest = await getStoredManifest();
   var newManifest = makeManifestWithoutPeer(manifest, peer);
   manifestStorage.set(newManifest);
   return newManifest;
@@ -258,24 +270,28 @@ function getLocalStorageValue(key) {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
     // Asynchronously fetch all data from storage
-      resolve(localStorage.getItem(key));
+      const storageValue = localStorage.getItem(key);
+      if (typeof storageValue === 'undefined') {
+        resolve(storageValue);
+      }
+      resolve(JSON.parse(localStorage.getItem(key)));
   });
 }
 
 function setLocalStorageValue(key, value) {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
-    localStorage.setItem('manifest',key, value);
+    localStorage.setItem(key, JSON.stringify(value));
       // Pass the data retrieved from storage down the promise chain.
       resolve();
   });
 }
 
 // Manifest
-function getStoredManifest() {
+async function getStoredManifest() {
   // Immediately return a promise and start asynchronous work
     // Asynchronously fetch all data from storage.sync.
-   var result = localStorage.getItem('manifest');
+   var result = await getLocalStorageValue('manifest');
       // Pass any observed errors down the promise chain.
       // Pass the data retrieved from storage down the promise chain.
    if (result == null || typeof result == 'undefined') {
@@ -288,14 +304,14 @@ function getStoredManifest() {
 
 function saveManifest(manifest) {
   // Immediately return a promise and start asynchronous work
-  localStorage.setItem('manifest', manifest);
+  setLocalStorageValue('manifest', manifest);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Credentials
 ////////////////////////////////////////////////////////////////////////////////
-function getStoredCredentials() {
-  return getLocalStorageValue('creddentials');
+async function getStoredCredentials() {
+  return getLocalStorageValue('credentials');
 }
 
 // validate the credentials against thehub
@@ -324,7 +340,7 @@ async function setHubCredentials(credentials) {
 
 
 function saveCredentials(credentials) {
-  localStorage.setItem('credentials', credentials);
+ setLocalStorageValue('credentials', credentials);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,8 +348,8 @@ function saveCredentials(credentials) {
 ////////////////////////////////////////////////////////////////////////////////
 async function uploadToHub() {
   // we might end up 
-  const manifest = getStoredManifest();
-  const credentials = getStoredCredentials();
+  const manifest = await getStoredManifest();
+  const credentials = await getStoredCredentials();
   // prepare the parameters to the API call
   console.log(credentials);
   var hubUploadUrl = credentials.hubAddress + "upload-manifest";
@@ -353,6 +369,26 @@ async function uploadToHub() {
   return response_json;
 }
 
+async function getLinkDescription(url) {
+  // we might end up 
+  const credentials = await getStoredCredentials();
+  // prepare the parameters to the API call
+  var hubGetLinkDescriptionUrl = credentials.hubAddress + "get-link-description";
+
+  const response = await fetch(hubGetLinkDescriptionUrl, {
+    body: new URLSearchParams({
+      username: credentials.username,
+      auth_token: credentials.authToken,
+      url: url,
+    }),
+    method: 'POST',
+  });
+  var response_json = await response.json();
+  return response_json;
+}
+
+
+
 
 async function handleMessage(request, sender, sendResponse) {
   function sendResult(result) {
@@ -366,7 +402,9 @@ async function handleMessage(request, sender, sendResponse) {
     updateFeed(request.adze.updateFeed).then(sendResult);
   } 
   else if (request.adze.getManifest) {
-    sendResult(getStoredManifest());
+    getStoredManifest().then(sendResult);
+  } else if (request.adze.addLink) {
+    addLinkToList(request.adze.addLink).then(sendResult);
   } else if (request.adze.addDocument) {
     addDocToList(request.adze.addDocument).then(sendResult);
   } else if (request.adze.removeDocument) {

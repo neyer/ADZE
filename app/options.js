@@ -13,7 +13,7 @@
     document.getElementById("btn-add-peer").addEventListener("click", addPeerFromInputBox);
     //TODO: fetch the document and get the title
     // move that logic into background.js
-    //document.getElementById("btn-add-link").addEventListener("click", addLinkFromInputBox);
+    document.getElementById("btn-add-link").addEventListener("click", addLinkFromInputBox);
     setupTabs();
     setActiveTab('setup');
     restoreManifest();
@@ -277,7 +277,11 @@
   }
 
   async function addLinkFromInputBox() {
-    // TODO
+    let linkAddress = document.getElementById("input-link-url").value;
+    sendBackendMessage({adze: { addLink: linkAddress} }, (manifest) => {
+      renderManifest(manifest);
+    });
+
   }
 
   /////////////////////////////////////////////////////////////////////////////
