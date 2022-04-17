@@ -1,5 +1,7 @@
 (function() {
 
+  const backendHook = {};
+
   function setup() {
     
    document.getElementById("btn-update-feed").addEventListener("click", updateFeed);
@@ -11,7 +13,7 @@
     document.getElementById("btn-add-peer").addEventListener("click", addPeerFromInputBox);
     //TODO: fetch the document and get the title
     // move that logic into background.js
-    //document.getElementById("btn-add-link").addEventListener("click", addLinkFromInputBox);
+    document.getElementById("btn-add-link").addEventListener("click", addLinkFromInputBox);
     setupTabs();
     setActiveTab('setup');
     restoreManifest();
@@ -24,13 +26,13 @@
   // on tab initialization
   function restoreManifest() {
     // Restore manifest to memory
-    chrome.runtime.sendMessage({adze: { getManifest: {}}}, (response) => {
+    sendBackendMessage({adze: { getManifest: {}}}, (response) => {
       renderManifest(response);
     });
   }
 
   function restoreCredentials() {
-    chrome.runtime.sendMessage({adze: { getHubCredentials: {}}}, (response) => {
+    sendBackendMessage({adze: { getHubCredentials: {}}}, (response) => {
       renderHubCredentials(response);
     });
   }
@@ -84,7 +86,7 @@
 
   // feed stuff
   function updateFeed() {
-    chrome.runtime.sendMessage({adze: { updateFeed: {} }}, (feedDocs) => {
+    sendBackendMessage({adze: { updateFeed: {} }}, (feedDocs) => {
       renderFeed(feedDocs);
       document.getElementById("text-feed-updated-timestamp").innerHTML = 
         "Last updated "+(new Date()).toLocaleString();
@@ -94,13 +96,13 @@
 
   // managing peers and links
   function removeAdzeLink(doc) {
-    chrome.runtime.sendMessage({adze: { removeDocument: doc}}, () => {
+    sendBackendMessage({adze: { removeDocument: doc}}, () => {
       restoreManifest();
     });
   }
 
   function removeAdzePeer(peer) {
-    chrome.runtime.sendMessage({adze: { removePeer: peer}}, () => {
+    sendBackendMessage({adze: { removePeer: peer}}, () => {
       restoreManifest();
     });
   }
@@ -269,13 +271,17 @@
   }
 
   async function addPeer(peerDesc) {
-    chrome.runtime.sendMessage({adze: { addPeer: peerDesc } }, (manifest) => {
+    sendBackendMessage({adze: { addPeer: peerDesc } }, (manifest) => {
       renderManifest(manifest);
     });
   }
 
   async function addLinkFromInputBox() {
-    // TODO
+    let linkAddress = document.getElementById("input-link-url").value;
+    sendBackendMessage({adze: { addLink: linkAddress} }, (manifest) => {
+      renderManifest(manifest);
+    });
+
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -284,7 +290,7 @@
   async function uploadManifest() {
     console.log('uploading');
 
-    chrome.runtime.sendMessage({adze: { uploadToHub: {} }}, (responseJson) => {
+    sendBackendMessage({adze: { uploadToHub: {} }}, (responseJson) => {
       console.log(responseJson);
       if (responseJson.result != 'success') {
         renderErrorMessage(responseJson.message);
@@ -315,7 +321,7 @@
       email: document.getElementById("hub-email").value,
     };
 
-    chrome.runtime.sendMessage({adze: { setHubCredentials: desiredCredentials }}, (credentials) => {
+    sendBackendMessage({adze: { setHubCredentials: desiredCredentials }}, (credentials) => {
       renderHubCredentials(credentials);
     });
   }
@@ -327,7 +333,10 @@
 
 
   function renderHubCredentials(credentials) {
-    if (typeof credentials.errorMessage !== 'undefined')  {
+    if (credentials == null || typeof credentials == 'undefined') {
+      return;
+    };
+    if (credentials != null && (typeof credentials.errorMessage !== 'undefined'))  {
         renderErrorMessage(credentials.errorMessage);
     }
 

@@ -1,46 +1,8 @@
-chrome.action.onClicked.addListener((tab) => {
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    files: ['content.js']
-  });
-});
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  function sendResult(result) {
-    sendResponse(result);
-  }
-  if (typeof request.adze === 'undefined') {
-    return true;
-  }
-  // Links
-  else if (request.adze.updateFeed) {
-    updateFeed(request.adze.updateFeed).then(sendResult);
-  } 
-  else if (request.adze.getManifest) {
-    getStoredManifest().then(sendResult);
-  } else if (request.adze.addDocument) {
-    addDocToList(request.adze.addDocument).then(sendResult);
-  } else if (request.adze.removeDocument) {
-    removeDocFromList(request.adze.removeDocument).then(sendResult);
-  // Peers
-  }  else if (request.adze.addPeer) {
-    addPeerToList(request.adze.addPeer).then(sendResult);
-  }  else if (request.adze.removePeer) {
-    removePeerFromList(request.adze.removePeer).then(sendResult);
-  // Uploading
-  } else if (request.adze.getHubCredentials) {
-    getStoredCredentials(request.adze.getStoredCredentials).then(sendResult);
-  } else if (request.adze.setHubCredentials) {
-    setHubCredentials(request.adze.setHubCredentials).then(sendResult);
-  } else if (request.adze.uploadToHub) {
-    uploadToHub(request.adze.uploadToHub).then(sendResult);
-  }
-  // This tells the runtime, 'yes we will return a response'.
-  // if you dont' do this here, the runtime will drop the connection
-  // and you won't be able to send the response.
-  return true;
-});
 
+const runtimeHook =  {};
+
+// handles messages from the frontend of the app
 ////////////////////////////////////////////////////////////////////////////////
 // Feed
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,11 +128,22 @@ async function updateFeed() {
 
 
 // Doc (link) management
+async function addLinkToList(linkAddress) {
+  const linkDesc = await getLinkDescription(linkAddress);
+  const docToAdd = {
+    title: linkDesc.title,
+    url: linkAddress,
+    timestamp_ms: Date.now(),
+  }
+  console.log(docToAdd);
+  return await addDocToList(docToAdd);
+}
+
+
 async function addDocToList(doc) {
   var manifest = await getStoredManifest();
   manifest.content.sites.push(doc);
-  manifestStorage.set(manifest);
-
+  await saveManifest(manifest);
   return manifest;
 }
 
@@ -192,7 +165,7 @@ function makeManifestWithoutDoc(oldManifest, toRemove) {
 async function removeDocFromList(doc, cb) {
   var manifest = await getStoredManifest();
   var newManifest = makeManifestWithoutDoc(manifest, doc);
-  manifestStorage.set(newManifest);
+  saveManifest(newManifest);
   return newManifest;
 }
 
@@ -268,26 +241,6 @@ function makeManifestWithoutPeer(oldManifest, toRemove) {
   return newManifest;
 }
 
-
-const manifestStorage = {
-  get: (cb) => {
-    chrome.storage.local.get(['manifest'], (result) => {
-      storedValue = result.manifest;
-      if (typeof storedValue === 'undefined') {
-        // if there is no manifest there, make a new one with the 
-       // adze creator's list as a recommended start point
-        cb(makeNewManifest(true));
-      } else {
-        return cb(JSON.parse(storedValue));
-      }
-    });
-  },
-  set: (value, cb) => {
-    chrome.storage.local.set({manifest: JSON.stringify(value)}, cb);
-  }
-};
-
-
 function makeNewManifest(addCreator) {
    var result = {
      "meta": { "nickname": "uknown"},
@@ -317,84 +270,48 @@ function getLocalStorageValue(key) {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
     // Asynchronously fetch all data from storage
-    chrome.storage.local.get([key], (result) => {
-      // Pass any observed errors down the promise chain.
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
+      const storageValue = localStorage.getItem(key);
+      if (typeof storageValue === 'undefined') {
+        resolve(storageValue);
       }
-      // Pass the data retrieved from storage down the promise chain.
-      resolve(result.key);
-    });
+      resolve(JSON.parse(localStorage.getItem(key)));
   });
 }
 
 function setLocalStorageValue(key, value) {
   // Immediately return a promise and start asynchronous work
   return new Promise((resolve, reject) => {
-    storageCommand = {};
-    storageCommand[key] = value;
-    chrome.storage.local.set(storageCommand, (result) => {
-      // Pass any observed errors down the promise chain.
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
+    localStorage.setItem(key, JSON.stringify(value));
       // Pass the data retrieved from storage down the promise chain.
       resolve();
-    });
   });
 }
+
 // Manifest
-function getStoredManifest() {
+async function getStoredManifest() {
   // Immediately return a promise and start asynchronous work
-  return new Promise((resolve, reject) => {
     // Asynchronously fetch all data from storage.sync.
-    manifestStorage.get( (result) => {
+   var result = await getLocalStorageValue('manifest');
       // Pass any observed errors down the promise chain.
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
       // Pass the data retrieved from storage down the promise chain.
-      if (typeof result.meta.nickame === 'undefined' && typeof result.meta.username !== 'undefined') {
-        // hacky migration for when this field name changed.
-        // ideally there's a file defining types and doing migrations.
-        result.meta.nickname = result.meta.username;
-        delete result.meta.username;
-      }
-      resolve(result);
-    });
-  });
+   if (result == null || typeof result == 'undefined') {
+     // hacky migration for when this field name changed.
+     // ideally there's a file defining types and doing migrations.
+     result = makeNewManifest(true);
+   }
+   return result;
 }
+
 function saveManifest(manifest) {
   // Immediately return a promise and start asynchronous work
-  return new Promise((resolve, reject) => {
-    // Asynchronously fetch all data from storage.sync.
-    manifestStorage.set(manifest, (result) => {
-      // Pass any observed errors down the promise chain.
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      // Pass the data retrieved from storage down the promise chain.
-      resolve();
-    });
-  });
+  setLocalStorageValue('manifest', manifest);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Credentials
 ////////////////////////////////////////////////////////////////////////////////
-function getStoredCredentials() {
-  // Immediately return a promise and start asynchronous work
-  return new Promise((resolve, reject) => {
-    // Asynchronously fetch all data from storage.sync.
-    chrome.storage.local.get(['credentials'], (result) => {
-      // Pass any observed errors down the promise chain.
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      // Pass the data retrieved from storage down the promise chain.
-      resolve(result.credentials);
-    });
-  });
+async function getStoredCredentials() {
+  return getLocalStorageValue('credentials');
 }
 
 // validate the credentials against thehub
@@ -423,19 +340,7 @@ async function setHubCredentials(credentials) {
 
 
 function saveCredentials(credentials) {
-  //
-  // Immediately return a promise and start asynchronous work
-  return new Promise((resolve, reject) => {
-    // Asynchronously fetch all data from storage.sync.
-    chrome.storage.local.set({credentials:credentials}, (result) => {
-      // Pass any observed errors down the promise chain.
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      // Pass the data retrieved from storage down the promise chain.
-      resolve();
-    });
-  });
+ setLocalStorageValue('credentials', credentials);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -463,4 +368,68 @@ async function uploadToHub() {
   }
   return response_json;
 }
+
+async function getLinkDescription(url) {
+  // we might end up 
+  const credentials = await getStoredCredentials();
+  // prepare the parameters to the API call
+  var hubGetLinkDescriptionUrl = credentials.hubAddress + "get-link-description";
+
+  const response = await fetch(hubGetLinkDescriptionUrl, {
+    body: new URLSearchParams({
+      username: credentials.username,
+      auth_token: credentials.authToken,
+      url: url,
+    }),
+    method: 'POST',
+  });
+  var response_json = await response.json();
+  return response_json;
+}
+
+
+
+
+async function handleMessage(request, sender, sendResponse) {
+  function sendResult(result) {
+    sendResponse(result);
+  }
+  if (typeof request.adze === 'undefined') {
+    return true;
+  }
+  // Links
+  else if (request.adze.updateFeed) {
+    updateFeed(request.adze.updateFeed).then(sendResult);
+  } 
+  else if (request.adze.getManifest) {
+    getStoredManifest().then(sendResult);
+  } else if (request.adze.addLink) {
+    addLinkToList(request.adze.addLink).then(sendResult);
+  } else if (request.adze.addDocument) {
+    addDocToList(request.adze.addDocument).then(sendResult);
+  } else if (request.adze.removeDocument) {
+    removeDocFromList(request.adze.removeDocument).then(sendResult);
+  // Peers
+  }  else if (request.adze.addPeer) {
+    addPeerToList(request.adze.addPeer).then(sendResult);
+  }  else if (request.adze.removePeer) {
+    removePeerFromList(request.adze.removePeer).then(sendResult);
+  // Uploading
+  } else if (request.adze.getHubCredentials) {
+    getStoredCredentials(request.adze.getStoredCredentials).then(sendResult);
+  } else if (request.adze.setHubCredentials) {
+    setHubCredentials(request.adze.setHubCredentials).then(sendResult);
+  } else if (request.adze.uploadToHub) {
+    uploadToHub(request.adze.uploadToHub).then(sendResult);
+  }
+  // This tells the runtime, 'yes we will return a response'.
+  // if you dont' do this here, the runtime will drop the connection
+  // and you won't be able to send the response.
+  return true;
+}
+
+async function sendBackendMessage(message, responseHandler)  {
+ await handleMessage(message, null, responseHandler);
+}
+
 
