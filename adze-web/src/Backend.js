@@ -1,6 +1,8 @@
 
 
 const runtimeHook =  {};
+var ADZE = {};
+
 
 // handles messages from the frontend of the app
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +128,8 @@ async function updateFeed() {
   return mergedLinks;
 }
 
+ADZE.updateFeed = updateFeed;
+
 
 // Doc (link) management
 async function addLinkToList(linkAddress) {
@@ -139,6 +143,8 @@ async function addLinkToList(linkAddress) {
   return await addDocToList(docToAdd);
 }
 
+ADZE.addLinkToList = addLinkToList;
+
 
 async function addDocToList(doc) {
   var manifest = await getStoredManifest();
@@ -146,6 +152,8 @@ async function addDocToList(doc) {
   await saveManifest(manifest);
   return manifest;
 }
+
+ADZE.addDocToList = addDocToList;
 
 function makeManifestWithoutDoc(oldManifest, toRemove) {
   var newManifest = makeNewManifest();
@@ -168,6 +176,8 @@ async function removeDocFromList(doc, cb) {
   saveManifest(newManifest);
   return newManifest;
 }
+
+ADZE.removeDocFromList = removeDocFromList;
 
 
 /// Peers
@@ -214,16 +224,20 @@ async function addPeerToList(peer) {
   peer.nickname = peerManifest.meta.nickname || peerManifest.meta.username;
 
   manifest.content.peers.push(peer);
-  manifestStorage.set(manifest);
+  saveManifest(manifest);
   return manifest;
 }
+
+ADZE.addPeerToList = addPeerToList;
 
 async function removePeerFromList(peer) {
   var manifest = await getStoredManifest();
   var newManifest = makeManifestWithoutPeer(manifest, peer);
-  manifestStorage.set(newManifest);
+  saveManifest(newManifest);
   return newManifest;
 }
+
+ADZE.removePeerFromList = removePeerFromList;
 
 function makeManifestWithoutPeer(oldManifest, toRemove) {
   var newManifest = makeNewManifest();
@@ -260,7 +274,9 @@ function makeNewManifest(addCreator) {
   return result;
 }
 
-function isValidManfest() {
+ADZE.makeNewManifest = makeNewManifest;
+
+function isValidManfest(manifest) {
   // TODO: add checks here, log if the data is corrupted rather than absent
  return !(typeof manifest === 'undefined' || manifest === null || typeof manifest.meta === 'undefined');
 }
@@ -302,6 +318,8 @@ async function getStoredManifest() {
    return result;
 }
 
+ADZE.getStoredManifest = getStoredManifest;
+
 function saveManifest(manifest) {
   // Immediately return a promise and start asynchronous work
   setLocalStorageValue('manifest', manifest);
@@ -313,6 +331,9 @@ function saveManifest(manifest) {
 async function getStoredCredentials() {
   return getLocalStorageValue('credentials');
 }
+
+
+ADZE.getStoredCredentials = getStoredCredentials;
 
 // validate the credentials against thehub
 async function setHubCredentials(credentials) {
@@ -338,6 +359,8 @@ async function setHubCredentials(credentials) {
   return credentials;
 }
 
+
+ADZE.setHubCredentials = setHubCredentials
 
 function saveCredentials(credentials) {
  setLocalStorageValue('credentials', credentials);
@@ -368,6 +391,7 @@ async function uploadToHub() {
   }
   return response_json;
 }
+ADZE.uploadToHub = uploadToHub;
 
 async function getLinkDescription(url) {
   // we might end up 
@@ -433,6 +457,4 @@ async function sendBackendMessage(message, responseHandler)  {
 }
 
 
-var ADZE = {
-  getStoredManifest: getStoredManifest,
-}
+export default ADZE
