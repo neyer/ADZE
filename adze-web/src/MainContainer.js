@@ -52,6 +52,15 @@ class TabSelector extends React.Component {
         <LinksSection isActive={this.state.currentTab === "links"} mainfest={this.state.manifest} />
         <PeersSection isActive={this.state.currentTab === "peers"} mainfest={this.state.manifest} />
         <ConfigureSection isActive={this.state.currentTab === "setup"} mainfest={this.state.manifest} />
+<footer className="footer">
+  <div className="content has-text-centered">
+    <p>
+      <strong>ADZE</strong> by <a href="https://apxhard.com">Mark Neyer</a>. The source code is licensed
+      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. Made with <span>&#x1F497;</span> in Ohio.
+    </p>
+  </div>
+</footer>
+
       </div>
      )
   }

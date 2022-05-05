@@ -17,15 +17,8 @@ class SingleLinkElement extends React.Component {
     const { link } = this.props;
     return (
         <li>
-               <div className="columns">
-          <div className="column is-two-fifths">
-            <a href={link.url}> {link.title}</a>
-          </div>
-           <div className="column is-two-fifths area-provenance-details">
-             TODO: provenance details
-           </div>
-           <div className="column">(feedback will go here)</div>
-        </div>
+          <span>&#x274C;</span>
+          <a href={link.url}> {link.title}</a>
       </li>
     );
   }

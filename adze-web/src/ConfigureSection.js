@@ -1,8 +1,14 @@
 import Constants from './Constants.js'
+import { selectManifest } from './state/manifestSlice.js'
+import { useSelector, useDispatch} from 'react-redux'
+
 
 function ConfigureSection({isActive}) {
   const className = isActive ?  "" : "is-invisible";
   const styleType = isActive ? {} : Constants.invisibleStyle;
+
+  const  manifest = useSelector(selectManifest);
+
   return (
   <div className={className} id="section-setup" style={styleType}>
     <h3 className="title is-3">For Uploadin'</h3>
@@ -48,7 +54,8 @@ function ConfigureSection({isActive}) {
           </div>
        </div>
       <h3 className="title is-3">For Debuggin'</h3>
-      <p id="message"></p>
+      <p>Manifest Content:</p>
+      <p>{JSON.stringify(manifest)}</p>
     </section>
   </div>
   )
