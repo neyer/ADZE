@@ -36,8 +36,6 @@ function LinksSection({isActive}) {
   const styleType = isActive ? {} : Constants.invisibleStyle;
   const  manifest = useSelector(selectManifest);
 
-  console.log("ho ho ho");
-  console.log(manifest);
   const linkItems = manifest.content.sites.map(site => <SingleLinkElement link={site} />);
   //const linkItems = [];
   return (

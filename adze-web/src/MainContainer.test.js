@@ -32,7 +32,6 @@ test('tab navigation works', () => {
       if (linkText === otherText) {
         return;
       }
-      console.log("Checking visbility of "+otherHeaderText);
       const otherTabHeader = screen.getByText(otherHeaderText);
       expect(otherTabHeader).not.toBeVisible();
 
