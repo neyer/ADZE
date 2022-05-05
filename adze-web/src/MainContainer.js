@@ -1,5 +1,6 @@
 import React from 'react'
 
+
 import FeedSection from './FeedSection.js'
 import LinksSection from './LinksSection.js'
 import PeersSection from './PeersSection.js'
@@ -7,26 +8,16 @@ import ConfigureSection  from './ConfigureSection.js'
 
 import ADZE from './Backend.js'
 
-const INVISIBLE_STYLE = {height: '0px', padding: '0px'};
 
-
-class MainContainer extends React.Component {
-
-  constructor(props) {
-    super(props);
-  this.state = {manifest: ADZE.makeNewManifest() }
-  }
-
-  render () {
-    return (
+function MainContainer (){
+        return (
       <section className="section">
         <div className="container">
           <p className="title">Adze Recommendation Protocol</p>
-          <TabSelector manifest={this.state.manifest}/>
+          <TabSelector />
         </div>
       </section>
     );
-  }
 }
 
 
@@ -47,10 +38,6 @@ class TabSelector extends React.Component {
   }
    
   render() {
-    
-      const inactiveStyle = { height:'0px', padding:'0px' };
-  
-   
       return  (
       <div>
         <div className="tabs is-medium is-centered">
@@ -61,10 +48,10 @@ class TabSelector extends React.Component {
               <li className={this.getClassForTabSelector("setup")} id="btn-select-tab-setup"><a onClick={() => this.setTab("setup")}>setup</a></li>
              </ul>
         </div>
-        <FeedSection  isActive={this.state.currentTab == "feed"} />
-        <LinksSection isActive={this.state.currentTab == "links"} />
-        <PeersSection isActive={this.state.currentTab == "peers"} />
-        <ConfigureSection isActive={this.state.currentTab == "setup"} />
+        <FeedSection  isActive={this.state.currentTab === "feed"} mainfest={this.state.manifest} />
+        <LinksSection isActive={this.state.currentTab === "links"} mainfest={this.state.manifest} />
+        <PeersSection isActive={this.state.currentTab === "peers"} mainfest={this.state.manifest} />
+        <ConfigureSection isActive={this.state.currentTab === "setup"} mainfest={this.state.manifest} />
       </div>
      )
   }

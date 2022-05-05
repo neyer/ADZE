@@ -1,9 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MainContainer from './MainContainer.js'
+import { Provider } from 'react-redux'
+import store from './store.js'
 
 test('tab navigation works', () => {
-  render(<MainContainer />);
+  render(
+    <Provider store={store}>
+      <MainContainer />
+    </Provider>
+   );
 
   var tabLinkToHeader = {
     feed: "Recommended Links from your Peers",

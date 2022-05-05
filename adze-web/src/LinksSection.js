@@ -1,8 +1,45 @@
+import React from 'react'
+
+
 import Constants from './Constants.js'
+
+import { selectManifest } from './state/manifestSlice.js'
+import { useSelector, useDispatch} from 'react-redux'
+
+
+class SingleLinkElement extends React.Component {
+   // upvote adze it to your own list of links
+  // gives you the option of following the peer if you aren't already
+   // downvote removes it from your feed, adze it to your list of 'no good'
+  // links, and gives the option of removing that peer
+
+  render() {
+    const { link } = this.props;
+    return (
+        <li>
+               <div className="columns">
+          <div className="column is-two-fifths">
+            <a href={link.url}> {link.title}</a>
+          </div>
+           <div className="column is-two-fifths area-provenance-details">
+             TODO: provenance details
+           </div>
+           <div className="column">(feedback will go here)</div>
+        </div>
+      </li>
+    );
+  }
+}
 
 function LinksSection({isActive}) {
   const className = isActive ?  "" : "is-invisible";
   const styleType = isActive ? {} : Constants.invisibleStyle;
+  const  manifest = useSelector(selectManifest);
+
+  console.log("ho ho ho");
+  console.log(manifest);
+  const linkItems = manifest.content.sites.map(site => <SingleLinkElement link={site} />);
+  //const linkItems = [];
   return (
     <div className={className} id="section-links" style={styleType}>
          <h2 className="title is-2">Adzed Links</h2>
@@ -16,7 +53,7 @@ function LinksSection({isActive}) {
                       <a className="button" id="btn-add-link">Adze Link</a>
                     </div>
               </div>
-             <ul id="adze-link-list"></ul>
+             <ul id="adze-link-list">{linkItems}</ul>
        </div>
   )
 }
