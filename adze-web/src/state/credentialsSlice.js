@@ -57,7 +57,7 @@ export const validateCredentials = createAsyncThunk(
 export const credentialsSlice = createSlice({
   name: 'credentials',
 
-  initialState: { value: makeNewCredentials() },
+  initialState:  makeNewCredentials(),
 
   reducers: {
   },
@@ -67,14 +67,13 @@ export const credentialsSlice = createSlice({
       console.log("Updating the credentials with payload");
       console.log(action.payload);
       // set values from the payload to the state
-      return {value: action.payload };
+      return  action.payload;
     })
   }
 
 });
 
 
-export const selectCredentials = (state) =>  state.credentials.value
-export const { update } = credentialsSlice.actions
+export const selectCredentials = (state) =>  state.credentials;
 
 export default credentialsSlice.reducer

@@ -3,8 +3,11 @@ import React from 'react'
 
 import Constants from './Constants.js'
 
-import { selectManifest } from './state/manifestSlice.js'
+import { selectManifest , addLinkByUrl } from './state/manifestSlice.js'
+import { selectCredentials  } from './state/credentialsSlice.js'
 import { useSelector, useDispatch} from 'react-redux'
+
+import { ErrorMessageOrNull, ManifestStatusMessage} from './notifications.js'
 
 
 class SingleLinkElement extends React.Component {
@@ -16,7 +19,7 @@ class SingleLinkElement extends React.Component {
   render() {
     const { link } = this.props;
     return (
-        <li>
+        <li key={link.url}>
           <span>&#x274C;</span>
           <a href={link.url}> {link.title}</a>
       </li>
@@ -27,25 +30,40 @@ class SingleLinkElement extends React.Component {
 function LinksSection({isActive}) {
   const className = isActive ?  "" : "is-invisible";
   const styleType = isActive ? {} : Constants.invisibleStyle;
-  const  manifest = useSelector(selectManifest);
+  const manifest = useSelector(selectManifest);
+  const credentials = useSelector(selectCredentials);
+  const dispatch = useDispatch();
 
   const linkItems = manifest.content.sites.map(site => <SingleLinkElement link={site} />);
-  //const linkItems = [];
+
+
+  const handleAddLink = (event) => {  
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const { inputLinkUrl } =  event.target.elements;
+
+    dispatch(addLinkByUrl({credentials: credentials, link: inputLinkUrl.value}));
+  }
   return (
     <div className={className} id="section-links" style={styleType}>
          <h2 className="title is-2">Adzed Links</h2>
          <h3 className="subtitle is-3">Links you are recommending</h3>
-         <h3 className="subtitle is-6">You need valid credentials in the 'setup' tab first</h3>
+        <ManifestStatusMessage credentials={credentials}/>
+          <form onSubmit={handleAddLink}>
             <div className="field has-addons">
                     <div className="control is-expanded">
-                      <input className="input" type="text" id="input-link-url" placeholder="put links to good content here"></input>
+                      <input className="input" type="text" id="inputLinkUrl" placeholder="put links to good content here"></input>
                     </div>
                     <div className="control">
-                      <a className="button" id="btn-add-link">Adze Link</a>
+                      <button 
+                          className="button"
+                          type="submit"
+                          id="btn-add-link">Adze Link</button>
                     </div>
               </div>
-             <ul id="adze-link-list">{linkItems}</ul>
-       </div>
+          </form>
+       <ul id="adze-link-list">{linkItems}</ul>
+    </div>
   )
 }
 

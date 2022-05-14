@@ -1,7 +1,9 @@
 import Constants from './Constants.js'
-import { selectManifest } from './state/manifestSlice.js'
+import { selectManifest, uploadToHub } from './state/manifestSlice.js'
 import { selectCredentials, validateCredentials } from './state/credentialsSlice.js'
 import { useSelector, useDispatch} from 'react-redux'
+
+import { ErrorMessageOrNull, ManifestStatusMessage} from './notifications.js'
 
 
 
@@ -25,6 +27,13 @@ function ConfigureSection({isActive}) {
     }));
 
   };
+
+  const uploadManifest = (event) => {
+    dispatch(uploadToHub({
+      credentials:credentials,
+      manifest:manifest
+    }));
+  }
 
   var notificationDiv
 
@@ -77,7 +86,7 @@ function ConfigureSection({isActive}) {
     <section className="section" id="hub-upload-form" style={{visbility:'hidden'}}>
         <div className="field">
          <div className="control">
-            <a className="button" id="btn-upload-hub">Upload</a>
+            <button className="button" id="btn-upload-hub" onClick={uploadManifest}>Upload</button>
           </div>
        </div>
       <h3 className="title is-3">For Debuggin'</h3>
@@ -88,43 +97,12 @@ function ConfigureSection({isActive}) {
   )
 }
 
-function ErrorMessageOrNull({errorMessage}) {
-  if (typeof errorMessage === "undfined" || errorMessage == null || errorMessage === "") {
-    return null;
-  }
-  return (
-        <div className="notification is-error">
-          {errorMessage}
-        </div>
-  );
-}
-
-function SuccessMessageOrNull({credentials}) {
-  if (credentials.manifestUrl  !== "") {
-    return (
-        <div className="notification is-success">
-          Your manifest is visible on the web at:
-          <a href={credentials.manifestUrl}> {credentials.manifestUrl}</a>
-        </div>
-    );
-  }
-  return (
-        <div className="notification is-warning">
-          You'll need to create credentials for an ADZE Hub for others to see your recommendations.
-        </div>
-    );
-}
-
-
 
 function UserRegistrationStatus({credentials}) {
   return (
     <section>
-      <SuccessMessageOrNull credentials={credentials}/>
+      <ManifestStatusMessage credentials={credentials}/>
       <ErrorMessageOrNull errorMessage={credentials.errorMessage}/>
-      <div className="notification">
-        Current Credentials: {JSON.stringify(credentials)}
-      </div>
     </section>
   )
 }

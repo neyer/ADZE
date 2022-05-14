@@ -1,4 +1,5 @@
-import { createSlice} from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import produce from "immer"
 
 //########################################
 // Defines a Slice managing manifest state. Mutators and helper functions as well.
@@ -39,67 +40,89 @@ function hasPeerAlready(manifest, peer) {
   return false;
 }
 
+// hub interaction APIS
+
+async function validateLinkFromHub(credentials, linkAddress) {
+  // prepare the parameters to the API call
+  var hubGetLinkDescriptionUrl = credentials.hubAddress + "get-link-description";
+  
+  console.log("Getting description for "+linkAddress);
+
+  const response = await fetch(hubGetLinkDescriptionUrl, {
+    body: new URLSearchParams({
+      username: credentials.username,
+      auth_token: credentials.authToken,
+      url: linkAddress,
+    }),
+    method: 'POST',
+  });
+  var response_json = await response.json();
+  return response_json;
+}
+
+async function uploadToHubAPI(credentials, manifest) {
+  // we might end up 
+  // prepare the parameters to the API call
+  var hubUploadUrl = credentials.hubAddress + "upload-manifest";
+
+  const response = await fetch(hubUploadUrl, {
+    body: new URLSearchParams({
+      username: credentials.username,
+      auth_token: credentials.authToken,
+      manifest_body: JSON.stringify(manifest),
+    }),
+    method: 'POST',
+  });
+  var response_json = await response.json();
+  if (response_json.result === 'success') {
+    response_json.manifestUrl =  credentials.manifestUrl;
+  }
+  console.log("Uploaded and got response: ");
+  console.log(response_json);
+}
+
+export const addLinkByUrl = createAsyncThunk(
+  'manifest/addLinkByUrl',
+  async (linkAndCreds, thunkAPI) => {
+   const linkDesc = await validateLinkFromHub(linkAndCreds.credentials, linkAndCreds.link)
+   return {
+     title: linkDesc.title,
+     url: linkDesc.url,
+     timestamp_ms: Date.now(),
+   }
+  }
+)
+
+
+export const uploadToHub = createAsyncThunk(
+  'manifest/uploadToHub',
+   async (manifestAndCreds, thunkAPI) => {
+   await uploadToHubAPI(manifestAndCreds.credentials, manifestAndCreds.manifest)
+  }
+)
 
 
 
 export const manifestSlice = createSlice({
   name: 'manifest',
 
-  initialState: { value: makeNewManifest(true) },
+  initialState:  makeNewManifest(true),
 
-  reducers: {
+  reducers: {},
   
-    // add a 'document'
-    addDocument: (state, action) => {
-      // TODO: check document type for validity here
-      state.content.sites.push(action.payload);
-      },
-    removeDocument: (state, action) => {
-      // TODO implement this
-    },
-    addPeer: (state, action) => {
-      // TODO: check peer for validity here
-      const peer = action.payload;
-      if (hasPeerAlready(state, peer)) {
-         // TODO: signal that the user has alrady added this peer
-         // maybe with some animation that higlights the entry in the list
-         return;
-      }
-      /*
+  extraReducers: (builder) => {
+    builder.addCase(addLinkByUrl.fulfilled, (state, action) =>  {
+    
+      const newState = produce(state, draftState => { 
+          draftState.content.sites.push(action.payload);
+     });
 
-      // todo: figure out use of async fetcher in state
-      //var peerManifest = await getPeerManifest(peer.url);
-      peer.nickname = peerManifest.meta.nickname || peerManifest.meta.username;
-
-      state.content.peers.push(peer);
-      state
-      */
-    },
-
-    removePeer: (state) => {
-      /*
-      // TODO
-      var newManifest = makeNewManifest();
-      // don't start with that default manifest in there.
-      newManifest.content.peers = [];
-      newManifest.meta = state .meta;
-      newManifest.content.sites = state.content.sites;
-      
-      for(let index in state.content.peers){
-        var thisPeer = state.content.peers[index];
-        if (thisPeer.url != toRemove.url) {
-          newManifest.content.peers.push(thisPeer);
-        }
-      }
-      state = newManifest
-      */
-    },
+      return newState;
+    });
   }
-
-  // todo: add docFeedback
 });
 
 
-export const selectManifest = (state) =>  state.manifest.value
+export const selectManifest = (state) =>  state.manifest
 
 export default manifestSlice.reducer
