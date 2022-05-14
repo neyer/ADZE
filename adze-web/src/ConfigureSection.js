@@ -1,6 +1,6 @@
 import Constants from './Constants.js'
 import { selectManifest } from './state/manifestSlice.js'
-import { selectCredentials, update as updateCredentials } from './state/credentialsSlice.js'
+import { selectCredentials, validateCredentials } from './state/credentialsSlice.js'
 import { useSelector, useDispatch} from 'react-redux'
 
 
@@ -18,7 +18,7 @@ function ConfigureSection({isActive}) {
     const formData = new FormData(event.currentTarget);
     const { hubAddress, hubUsername, hubEmail } =  event.target.elements;
 
-    dispatch(updateCredentials({
+    dispatch(validateCredentials({
       hubAddress: hubAddress.value,
       username: hubUsername.value,
       email: hubEmail.value
@@ -26,9 +26,14 @@ function ConfigureSection({isActive}) {
 
   };
 
+  var notificationDiv
+
   return (
   <div className={className} id="section-setup" style={styleType}>
     <h3 className="title is-3">For Uploadin'</h3>
+
+
+      <UserRegistrationStatus credentials={credentials}/>
 
        <p id="hub-credentials-form-desc">Adze needs your recommendations to be posted somewhere on the web where any other adze user can read them. To simplify this, you can use recommendation hosting service, called a hub. By default, the plugin uses the adze "origin hub", but anyone can host their own.</p>
       <section className="section" id="hub-credentials-form">
@@ -80,6 +85,47 @@ function ConfigureSection({isActive}) {
       <p>{JSON.stringify(manifest)}</p>
     </section>
   </div>
+  )
+}
+
+function ErrorMessageOrNull({errorMessage}) {
+  if (typeof errorMessage === "undfined" || errorMessage == null || errorMessage === "") {
+    return null;
+  }
+  return (
+        <div className="notification is-error">
+          {errorMessage}
+        </div>
+  );
+}
+
+function SuccessMessageOrNull({credentials}) {
+  if (credentials.manifestUrl  !== "") {
+    return (
+        <div className="notification is-success">
+          Your manifest is visible on the web at:
+          <a href={credentials.manifestUrl}> {credentials.manifestUrl}</a>
+        </div>
+    );
+  }
+  return (
+        <div className="notification is-warning">
+          You'll need to create credentials for an ADZE Hub for others to see your recommendations.
+        </div>
+    );
+}
+
+
+
+function UserRegistrationStatus({credentials}) {
+  return (
+    <section>
+      <SuccessMessageOrNull credentials={credentials}/>
+      <ErrorMessageOrNull errorMessage={credentials.errorMessage}/>
+      <div className="notification">
+        Current Credentials: {JSON.stringify(credentials)}
+      </div>
+    </section>
   )
 }
 
