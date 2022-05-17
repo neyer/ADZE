@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 
 import manifestReducer from './state/manifestSlice.js'
 import credentialsReducer from './state/credentialsSlice.js'
+import feedReducer from './state/feedSlice.js'
 
 const localStorageMiddleware = ({ getState }) => {
   return next => action => {
@@ -22,6 +23,7 @@ export default configureStore({
   reducer: {
     manifest: manifestReducer,
     credentials: credentialsReducer,
+    feed: feedReducer
   },
   preloadedState: reHydrateStore(),
   middleware: getDefaultMiddleware =>

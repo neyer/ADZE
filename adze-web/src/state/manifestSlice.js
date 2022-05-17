@@ -30,15 +30,39 @@ function makeNewManifest(addCreator) {
   return result;
 }
 
+// peers
+async function getPeerManifest(url) {
+  var cleanUrl = cleanPeerUrl(url);
+  const response = await fetch(cleanUrl, {
+    method: 'GET'
+  });
+  var responseBody = await response.text();
+  return JSON.parse(responseBody);
+}
+
+
 function hasPeerAlready(manifest, peer) {
   for(var peerNum in manifest.content.peers) {  
     var thisPeer = manifest.content.peers[peerNum];
-    if (thisPeer.url === peer.url) {
+    if (thisPeer.url == peer.url) {
       return true;
     }
   }
   return false;
 }
+
+// amazon does dumb stuff with 302's if you are using a non-/-terminated url
+// hence this delectable hack
+function cleanPeerUrl(baseUrl) {
+  if (baseUrl.search("//peers.adze.network/") != -1 && !baseUrl.endsWith('/')) {
+    return baseUrl+"/";
+  }
+  return baseUrl;
+}
+
+
+
+
 
 // hub interaction APIS
 
@@ -61,9 +85,10 @@ async function validateLinkFromHub(credentials, linkAddress) {
 }
 
 async function uploadToHubAPI(credentials, manifest) {
-  // we might end up 
   // prepare the parameters to the API call
   var hubUploadUrl = credentials.hubAddress + "upload-manifest";
+  console.log("Sending manifest");
+  console.log(manifest);
 
   const response = await fetch(hubUploadUrl, {
     body: new URLSearchParams({
@@ -94,6 +119,18 @@ export const addLinkByUrl = createAsyncThunk(
 )
 
 
+export const addPeerByUrl = createAsyncThunk(
+  'manifest/addPeerByUrl',
+   async (peerUrl) => {
+   const peerManifest = await getPeerManifest(peerUrl);
+   console.log("Adding a peer here "+peerUrl);
+   return {
+     url: peerUrl,
+     nickname: peerManifest.meta.nickname
+   }
+  }
+)
+
 export const uploadToHub = createAsyncThunk(
   'manifest/uploadToHub',
    async (manifestAndCreds, thunkAPI) => {
@@ -111,6 +148,7 @@ export const manifestSlice = createSlice({
   reducers: {},
   
   extraReducers: (builder) => {
+    // add Link by url
     builder.addCase(addLinkByUrl.fulfilled, (state, action) =>  {
     
       const newState = produce(state, draftState => { 
@@ -119,6 +157,20 @@ export const manifestSlice = createSlice({
 
       return newState;
     });
+
+    // add Peer by url
+    builder.addCase(addPeerByUrl.fulfilled, (state, action) =>  {
+    
+
+      console.log("Adding a peer here twoo");
+      console.log(action.payload);
+      const newState = produce(state, draftState => { 
+          draftState.content.peers.push(action.payload);
+     });
+
+      return newState;
+    });
+
   }
 });
 
