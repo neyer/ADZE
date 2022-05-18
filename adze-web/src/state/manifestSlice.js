@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import produce from "immer"
+import { getPeerManifest, hasPeerAlready, cleanUrl } from '../manifestLib.js'
 
 //########################################
 // Defines a Slice managing manifest state. Mutators and helper functions as well.
@@ -8,7 +9,7 @@ import produce from "immer"
 // helper to create new manifest. Might consider adding separate class just for type checking here.
 function makeNewManifest(addCreator) {
    var result = {
-     "meta": { "nickname": "uknown"},
+     "meta": { nickname: "uknown", timestamp: new Date().getTime() },
      "content" : {
         "sites": [
             { 
@@ -28,36 +29,6 @@ function makeNewManifest(addCreator) {
         "nickname" : "axphard (adze creator)" });
   }
   return result;
-}
-
-// peers
-async function getPeerManifest(url) {
-  var cleanUrl = cleanPeerUrl(url);
-  const response = await fetch(cleanUrl, {
-    method: 'GET'
-  });
-  var responseBody = await response.text();
-  return JSON.parse(responseBody);
-}
-
-
-function hasPeerAlready(manifest, peer) {
-  for(var peerNum in manifest.content.peers) {  
-    var thisPeer = manifest.content.peers[peerNum];
-    if (thisPeer.url == peer.url) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// amazon does dumb stuff with 302's if you are using a non-/-terminated url
-// hence this delectable hack
-function cleanPeerUrl(baseUrl) {
-  if (baseUrl.search("//peers.adze.network/") != -1 && !baseUrl.endsWith('/')) {
-    return baseUrl+"/";
-  }
-  return baseUrl;
 }
 
 

@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { getPeerManifest, mergePeerLinksList, flattenPeerLinksList, sortPeerLinksList } from '../manifestLib.js'
 import produce from "immer"
 
 //########################################
@@ -6,21 +7,86 @@ import produce from "immer"
 //########################################
 
 
+
 async function updateFeedLinks(manifest) {
+  // update the list of all cached content from the peers
+  // how many times should we follow peers?
+  // 1 hop: only local peers added by this maniest
+  // 2 hops: add 'peers of peers', i.e. order 2 peers
+  // todo: make this configurable, dynamic
+  var numPeerHops = 2;
+  var newPeers= await updatePeerManifestCache(manifest, numPeerHops);
+  var mergedLinks =  mergePeerLinksList(flattenPeerLinksList(newPeers));
+  var newLinks = sortPeerLinksList(mergedLinks);
+  return  { peers: newPeers, links: mergedLinks, meta: { timestamp: new Date().getTime() } };
 }
+
+function makeNewCache() { 
+  return{
+    // mapping from peer to manifest file
+    peers: []
+  };
+}
+async function updatePeerManifestCache(localManifest, numTimesToFollow) {
+  // todo: have this load from stored value to update rether than make a new one
+  var currentCache = makeNewCache();
+  // update the list of all cached content from the peers
+  var peersSeenSoFar = {};
+  var toVisit = [];
+  var toVisitNext = [];
+  var thisPeerOrder = 1;
+  // make a plan to visit all the local peers
+  for (var peerNo in localManifest.content.peers) {
+    var peer = localManifest.content.peers[peerNo];
+    peersSeenSoFar[peer.url] = true;
+    toVisit.push(peer);
+  }
+
+  while (numTimesToFollow > 0) {
+      for (var peerNo in toVisit) {
+        var peer = toVisit[peerNo];
+        var thisPeerManifest = await getPeerManifest(peer.url);
+        peersSeenSoFar[peer.url] = true;
+        thisPeerManifest.meta.order = thisPeerOrder;
+        thisPeerManifest.meta.url = peer.url;
+        currentCache.peers.push(thisPeerManifest);
+        // now add this peer's remote peers to visit next
+        for (var remotePeerNum in thisPeerManifest.content.peers) {
+           var thisRemotePeer = thisPeerManifest.content.peers[remotePeerNum];
+          // don't visit this peer twice
+          if (typeof peersSeenSoFar[thisRemotePeer.url] === 'undefined') {
+              // we will visit this peer if we traverse more hops
+              peersSeenSoFar[thisRemotePeer.url] = true;
+              toVisitNext.push(thisRemotePeer);
+          }
+      } // we've considered whether to visit all order n+1 peers of this order n peer
+    }
+    // we've followed the links once. Decrement counters, reset lets, etc.
+    ++thisPeerOrder;
+    --numTimesToFollow;
+    toVisit = toVisitNext;
+    toVisitNext = [];
+  }
+  // todo: save this cache
+  return currentCache;
+}
+
 
 export const updateFeed = createAsyncThunk(
   'feed/update',
    async (manifest, thunkAPI) => {
-   const feedResult = await updateFeedLinks(manifest)
+   return await updateFeedLinks(manifest)
   }
 )
 
 
 function makeInitialFeed() {
-  return [
-    { url: 'https://apxhard.com', title: "some stupid blog"  },
-  ]
+  return {
+    peers: [], // contains all kinds of fetched peers
+    // conatins a bunch of fetched links, in ranked order
+    links:[ { url: 'https://apxhard.com', title: "some stupid blog"  }, ],
+    meta:  { timestamp: new Date() }
+  }
 }
 
 
@@ -34,6 +100,8 @@ export const feedSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(updateFeed.fulfilled, (state, action) =>  {
     
+      console.log("new feed result is ");
+      console.log(action.payload);
       return action.payload;
     });
   }
