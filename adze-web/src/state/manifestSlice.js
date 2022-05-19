@@ -1,36 +1,12 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit'
 import produce from "immer"
-import { getPeerManifest, hasPeerAlready, cleanUrl } from '../manifestLib.js'
+import { getPeerManifest, hasPeerAlready, cleanUrl, makePeerListWithoutPeer, makeNewManifest } from '../manifestLib.js'
 
 //########################################
 // Defines a Slice managing manifest state. Mutators and helper functions as well.
 //########################################
 
 // helper to create new manifest. Might consider adding separate class just for type checking here.
-function makeNewManifest(addCreator) {
-   var result = {
-     "meta": { nickname: "uknown", timestamp: new Date().getTime() },
-     "content" : {
-        "sites": [
-            { 
-              url: "http://apxhard.com", 
-              title:  "this is some link",
-            },
-         ],
-        "peers": [
-          
-         ]
-      }
-   };
-
-  if (addCreator) {
-      result.content.peers.push( 
-        {"url":"https://peers.adze.network/apxhard/",
-        "nickname" : "axphard (adze creator)" });
-  }
-  return result;
-}
-
 
 
 
@@ -84,7 +60,7 @@ export const addLinkByUrl = createAsyncThunk(
    return {
      title: linkDesc.title,
      url: linkDesc.url,
-     timestamp_ms: Date.now(),
+     timestamp_ms: Date.now().getTime(),
    }
   }
 )
@@ -116,13 +92,19 @@ export const manifestSlice = createSlice({
 
   initialState:  makeNewManifest(true),
 
-  reducers: {},
+  reducers: {
+      removePeer: (state, action) => {
+        var withoutPeers = makePeerListWithoutPeer(state.content.peers, action.payload);
+        state.content.peers = withoutPeers;
+        console.log(current(state));
+      },
+  },
   
   extraReducers: (builder) => {
     // add Link by url
     builder.addCase(addLinkByUrl.fulfilled, (state, action) =>  {
     
-      const newState = produce(state, draftState => { 
+     const newState = produce(state, draftState => { 
           draftState.content.sites.push(action.payload);
      });
 
@@ -147,5 +129,7 @@ export const manifestSlice = createSlice({
 
 
 export const selectManifest = (state) =>  state.manifest
+
+export const { removePeer } = manifestSlice.actions
 
 export default manifestSlice.reducer

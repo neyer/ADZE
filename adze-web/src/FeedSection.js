@@ -103,6 +103,9 @@ class ProvenanceDescription extends React.Component {
   getCompactShareDescription() {
 
     const provenance = this.props.provenance;
+    if (typeof provenance === 'undefined') {
+      return "unknown";
+    }
     var adzeCountByOrder = [0,0,0,0,0];
      provenance.sharers.map((sharer) => {
         ++adzeCountByOrder[sharer.order];

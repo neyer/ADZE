@@ -1,4 +1,29 @@
 
+export function makeNewManifest(addCreator) {
+   var result = {
+     "meta": { nickname: "uknown", timestamp: new Date().getTime() },
+     "content" : {
+        "sites": [
+            { 
+              url: "http://apxhard.com", 
+              title:  "this is some link",
+            },
+         ],
+        "peers": [
+          
+         ]
+      }
+   };
+
+  if (addCreator) {
+      result.content.peers.push( 
+        {"url":"https://peers.adze.network/apxhard/",
+        "nickname" : "axphard (adze creator)" });
+  }
+  return result;
+}
+
+
 // peers
 export const getPeerManifest = async (url) => {
   var cleanUrl = cleanPeerUrl(url);
@@ -29,6 +54,20 @@ export const cleanPeerUrl = (baseUrl) => {
   return baseUrl;
 }
 
+export function makePeerListWithoutPeer(oldPeers, toRemove) {
+  // don't start with that default manifest in there.
+  let newPeers = [];
+  
+  console.log("removing "+toRemove);
+  for(let index in oldPeers){
+    var thisPeer = oldPeers[index];
+    if (thisPeer.url !== toRemove.url) {
+      console.log("adding peer "+thisPeer.url);
+      newPeers.push(thisPeer);
+    }
+  }
+  return newPeers;
+}
 
 export function flattenPeerLinksList(peerManifestCache) {
   // combines links from multuple peers into a single feed

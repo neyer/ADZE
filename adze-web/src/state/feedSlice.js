@@ -85,7 +85,7 @@ function makeInitialFeed() {
     peers: [], // contains all kinds of fetched peers
     // conatins a bunch of fetched links, in ranked order
     links:[ { url: 'https://apxhard.com', title: "some stupid blog"  }, ],
-    meta:  { timestamp: new Date() }
+    meta:  { timestamp: new Date().getTime() }
   }
 }
 
