@@ -6,6 +6,12 @@ import reportWebVitals from './reportWebVitals'
 import store from './store.js'
 import { Provider } from 'react-redux'
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faUserPlus)
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>

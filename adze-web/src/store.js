@@ -25,7 +25,7 @@ export default configureStore({
     credentials: credentialsReducer,
     feed: feedReducer
   },
- // preloadedState: reHydrateStore(),
+  preloadedState: reHydrateStore(),
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware().concat(localStorageMiddleware),
 })

@@ -75,6 +75,7 @@ async function updatePeerManifestCache(localManifest, numTimesToFollow) {
 export const updateFeed = createAsyncThunk(
   'feed/update',
    async (manifest, thunkAPI) => {
+    console.log("holy shit bro gonna do it");
    return await updateFeedLinks(manifest)
   }
 )
@@ -100,8 +101,6 @@ export const feedSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(updateFeed.fulfilled, (state, action) =>  {
     
-      console.log("new feed result is ");
-      console.log(action.payload);
       return action.payload;
     });
   }

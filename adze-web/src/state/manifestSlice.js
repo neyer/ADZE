@@ -17,8 +17,6 @@ async function validateLinkFromHub(credentials, linkAddress) {
   // prepare the parameters to the API call
   var hubGetLinkDescriptionUrl = credentials.hubAddress + "get-link-description";
   
-  console.log("Getting description for "+linkAddress);
-
   const response = await fetch(hubGetLinkDescriptionUrl, {
     body: new URLSearchParams({
       username: credentials.username,
@@ -34,8 +32,6 @@ async function validateLinkFromHub(credentials, linkAddress) {
 async function uploadToHubAPI(credentials, manifest) {
   // prepare the parameters to the API call
   var hubUploadUrl = credentials.hubAddress + "upload-manifest";
-  console.log("Sending manifest");
-  console.log(manifest);
 
   const response = await fetch(hubUploadUrl, {
     body: new URLSearchParams({
@@ -49,8 +45,6 @@ async function uploadToHubAPI(credentials, manifest) {
   if (response_json.result === 'success') {
     response_json.manifestUrl =  credentials.manifestUrl;
   }
-  console.log("Uploaded and got response: ");
-  console.log(response_json);
 }
 
 export const addLinkByUrl = createAsyncThunk(
@@ -70,7 +64,6 @@ export const addPeerByUrl = createAsyncThunk(
   'manifest/addPeerByUrl',
    async (peerUrl) => {
    const peerManifest = await getPeerManifest(peerUrl);
-   console.log("Adding a peer here "+peerUrl);
    return {
      url: peerUrl,
      nickname: peerManifest.meta.nickname
@@ -113,10 +106,6 @@ export const manifestSlice = createSlice({
 
     // add Peer by url
     builder.addCase(addPeerByUrl.fulfilled, (state, action) =>  {
-    
-
-      console.log("Adding a peer here twoo");
-      console.log(action.payload);
       const newState = produce(state, draftState => { 
           draftState.content.peers.push(action.payload);
      });

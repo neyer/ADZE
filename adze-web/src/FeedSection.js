@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Constants from './Constants.js'
 import { useSelector, useDispatch} from 'react-redux'
 
-import { selectManifest } from './state/manifestSlice.js'
+import { selectManifest , addPeerByUrl, removePeer } from './state/manifestSlice.js'
 import { selectFeed, updateFeed  } from './state/feedSlice.js'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 function FeedSection({isActive}) {
@@ -63,7 +65,8 @@ function SingleFeedLink({doc}) {
 }
 
 class ProvenanceDescription extends React.Component {
-    constructor(props) {
+
+  constructor(props) {
         super(props);
         this.state = { expanded: false }
    }
@@ -112,41 +115,40 @@ class ProvenanceDescription extends React.Component {
      });
   
     var sharersDesc = "";
+    var sharerParts = [];
     let hasAddedSharers = false;
     for (var peerOrder = 0; peerOrder < 4; ++ peerOrder) {
        var sharesByPeersOfThisOrder = adzeCountByOrder[peerOrder];
-       if (sharesByPeersOfThisOrder > 0)  {
-          if (hasAddedSharers) {
-            sharersDesc.push(", ");
-          }
-          var sharersDesc = sharesByPeersOfThisOrder.toString() + " order "  + 
-              peerOrder.toString() + " peer";
-          if (peerOrder == 1){ 
-              sharersDesc =  sharesByPeersOfThisOrder.toString() + " of your peers";
-          } else if  (sharesByPeersOfThisOrder > 1) {
-            sharersDesc += 's';
-          }
-          
-          
-          hasAddedSharers = true;
+       if (sharesByPeersOfThisOrder == 0)  {
+        continue;
        }
+       if (peerOrder == 1){ 
+           sharerParts.push(sharesByPeersOfThisOrder.toString() + " of your peers");
+          continue;
+       }
+       let thisShareDesc = (sharesByPeersOfThisOrder.toString() + " order "  + 
+              peerOrder.toString() + " peer");
+       if  (sharesByPeersOfThisOrder > 1) {
+            thisShareDesc += "s";
+       }
+       sharerParts.push(thisShareDesc);
     }
 
 
-    return sharersDesc;
+    return sharerParts.join(", ");;
   }
 
   getFullShareDescription() {
      // who as adzed this lnk
 
     const provenance = this.props.provenance;
-     provenance.sharers.sort(function(a,b) {
+    var clonedSharers = [...provenance.sharers];
+     clonedSharers.sort(function(a,b) {
           return a.order - b.order;
      });
   
-    let resultStrings = [ 'Shared by:<ul>' ];
-    const sharerElements = provenance.sharers.map ((sharer, index) => {
-      return this.singleSharerProvenance(sharer, index);
+    const sharerElements = clonedSharers.map ((sharer, index) => {
+      return <SingleSharerProvenance sharer={sharer} index={index} key={sharer.nickname}/>
     });
     return (
       <div>Shared by:
@@ -154,18 +156,30 @@ class ProvenanceDescription extends React.Component {
       </div>
     )
   }
+}
 
-  singleSharerProvenance(sharer, index)  {
-    if (sharer.order == 1) {
+function SingleSharerProvenance({sharer, index}) {
+    const [isAdded, setAdded] = useState(false);
+
+    const dispatch = useDispatch();
+    const handleAddPeer= (event) => {  
+      // redo the whole feed when they add the peer
+      setAdded(true);
+      dispatch(addPeerByUrl(sharer.url));
+    }
+
+    if (sharer.order == 1 || isAdded) {
         // if they are already a peer, we don't add the link;
        return <li key={index}> {sharer.nickname}, (your peer)</li>;
     } 
     return (
-       <li key={index}> {sharer.nickname} an order {sharer.order.toString()}  peer.
-        <span className="link-adze-remote-peer"> Adze Them.</span>
+       <li>{sharer.nickname} an order {sharer.order.toString()}  peer.
+         <FontAwesomeIcon 
+              icon="user-plus"
+              title="Add this Peer"
+              onClick={handleAddPeer}/>
        </li>
    );
-  }
  
 }
 
