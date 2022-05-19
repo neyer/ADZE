@@ -19,7 +19,7 @@ class SingleLinkElement extends React.Component {
   render() {
     const { link } = this.props;
     return (
-        <li key={link.url}>
+        <li>
           <span>&#x274C;</span>
           <a href={link.url}> {link.title}</a>
       </li>
@@ -34,7 +34,7 @@ function LinksSection({isActive}) {
   const credentials = useSelector(selectCredentials);
   const dispatch = useDispatch();
 
-  const linkItems = manifest.content.sites.map(site => <SingleLinkElement link={site} />);
+  const linkItems = manifest.content.sites.map(site => <SingleLinkElement key={site.url} link={site} />);
 
 
   const handleAddLink = (event) => {  

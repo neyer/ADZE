@@ -5,7 +5,7 @@ import { useSelector, useDispatch} from 'react-redux'
 
 const SinglePeerElement = ({peer}) => {
   return (
-      <li key={peer.nickname}>
+      <li>
         <span>&#x274C;</span>
         <a href={peer.url}> {peer.nickname}</a>
     </li>
@@ -20,7 +20,7 @@ function PeersSection({isActive}) {
   const manifest = useSelector(selectManifest);
   const dispatch = useDispatch();
 
-  const peerItems = manifest.content.peers.map(peer=> <SinglePeerElement peer={peer} />);
+  const peerItems = manifest.content.peers.map(peer=> <SinglePeerElement key={peer.url} peer={peer} />);
 
 
   const handleAddPeer= (event) => {  

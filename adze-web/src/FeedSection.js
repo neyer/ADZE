@@ -13,7 +13,7 @@ function FeedSection({isActive}) {
   const manifest = useSelector(selectManifest);
   const currentFeed = useSelector(selectFeed);
 
-  const feedItems = currentFeed.links.map(feedItem => <SingleFeedLink doc={feedItem}/>);
+  const feedItems = currentFeed.links.map(feedItem => <SingleFeedLink key={feedItem.url} doc={feedItem}/>);
 
   const dispatch = useDispatch();
   const doFeedUpdate = () => {
@@ -46,8 +46,9 @@ function SingleFeedLink({doc}) {
   // downvote removes it from your feed, adze it to your list of 'no good'
   // links, and gives the option of removing that peer
 
+
   return (
-       <li key={doc.url}>
+       <li key={doc.url.length}>
            <div className="columns">
              <div className="column is-two-fifths">
                <a href={doc.url}>{doc.title}</a>
@@ -83,7 +84,7 @@ class ProvenanceDescription extends React.Component {
   renderExpanded() {
     return ( 
       <div className="column is-two-fifths area-provenance-details">
-        <span class="btn-see-provenance" onClick={ () => this.toggleView() }>&#x274C;</span>
+        <span className="btn-see-provenance" onClick={ () => this.toggleView() }>&#x274C;</span>
         {this.getFullShareDescription()}
       </div>
     );
@@ -93,7 +94,7 @@ class ProvenanceDescription extends React.Component {
     const shortDesc = this.getCompactShareDescription();
     return ( 
       <div className="column is-two-fifths area-provenance-details">
-        <span class="btn-see-provenance" onClick={() => this.toggleView() }>&#x1F50D;</span> Shared by {shortDesc}
+        <span className="btn-see-provenance" onClick={() => this.toggleView() }>&#x1F50D;</span> Shared by {shortDesc}
       </div>
     );
 
@@ -154,11 +155,11 @@ class ProvenanceDescription extends React.Component {
   singleSharerProvenance(sharer, index)  {
     if (sharer.order == 1) {
         // if they are already a peer, we don't add the link;
-       return <li> {sharer.nickname}, (your peer)</li>;
+       return <li key={index}> {sharer.nickname}, (your peer)</li>;
     } 
     return (
-       <li> {sharer.nickname} an order {sharer.order.toString()}  peer.
-        <span class="link-adze-remote-peer"> Adze Them.</span>
+       <li key={index}> {sharer.nickname} an order {sharer.order.toString()}  peer.
+        <span className="link-adze-remote-peer"> Adze Them.</span>
        </li>
    );
   }
