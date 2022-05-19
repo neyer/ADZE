@@ -39,6 +39,7 @@ function FeedSection({isActive}) {
   )
 }
 
+
 function SingleFeedLink({doc}) {
   // upvote adze it to your own list of links
   // gives you the option of following the peer if you aren't already
@@ -51,15 +52,117 @@ function SingleFeedLink({doc}) {
              <div className="column is-two-fifths">
                <a href={doc.url}>{doc.title}</a>
              </div>
-             <div className="column is-two-fifths area-provenance-details">
-               (provenance goes here)
-             </div>
-             <div className="column">
+            <ProvenanceDescription provenance={doc.provenance}/>
+            <div className="column">
               (feedback will go here)
              </div>
          </div>
       </li>
   );
+}
+
+class ProvenanceDescription extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { expanded: false }
+   }
+
+  render() {
+     // who as adzed this lnk
+    
+    if (this.state.expanded) {
+      return this.renderExpanded();
+    } 
+    return this.renderCompact();
+  }
+
+  toggleView() {
+    this.setState({ expanded: !this.state.expanded});
+  }
+
+  renderExpanded() {
+    return ( 
+      <div className="column is-two-fifths area-provenance-details">
+        <span class="btn-see-provenance" onClick={ () => this.toggleView() }>&#x274C;</span>
+        {this.getFullShareDescription()}
+      </div>
+    );
+  }
+
+  renderCompact() {
+    const shortDesc = this.getCompactShareDescription();
+    return ( 
+      <div className="column is-two-fifths area-provenance-details">
+        <span class="btn-see-provenance" onClick={() => this.toggleView() }>&#x1F50D;</span> Shared by {shortDesc}
+      </div>
+    );
+
+  }
+
+  getCompactShareDescription() {
+
+    const provenance = this.props.provenance;
+    var adzeCountByOrder = [0,0,0,0,0];
+     provenance.sharers.map((sharer) => {
+        ++adzeCountByOrder[sharer.order];
+     });
+  
+    var sharersDesc = "";
+    let hasAddedSharers = false;
+    for (var peerOrder = 0; peerOrder < 4; ++ peerOrder) {
+       var sharesByPeersOfThisOrder = adzeCountByOrder[peerOrder];
+       if (sharesByPeersOfThisOrder > 0)  {
+          if (hasAddedSharers) {
+            sharersDesc.push(", ");
+          }
+          var sharersDesc = sharesByPeersOfThisOrder.toString() + " order "  + 
+              peerOrder.toString() + " peer";
+          if (peerOrder == 1){ 
+              sharersDesc =  sharesByPeersOfThisOrder.toString() + " of your peers";
+          } else if  (sharesByPeersOfThisOrder > 1) {
+            sharersDesc += 's';
+          }
+          
+          
+          hasAddedSharers = true;
+       }
+    }
+
+
+    return sharersDesc;
+  }
+
+  getFullShareDescription() {
+     // who as adzed this lnk
+
+    const provenance = this.props.provenance;
+     provenance.sharers.sort(function(a,b) {
+          return a.order - b.order;
+     });
+  
+    let resultStrings = [ 'Shared by:<ul>' ];
+    const sharerElements = provenance.sharers.map ((sharer, index) => {
+      return this.singleSharerProvenance(sharer, index);
+    });
+    return (
+      <div>Shared by:
+       <ul>{sharerElements}</ul>
+      </div>
+    )
+  }
+
+  singleSharerProvenance(sharer, index)  {
+    if (sharer.order == 1) {
+        // if they are already a peer, we don't add the link;
+       return <li> {sharer.nickname}, (your peer)</li>;
+    } 
+    return (
+       <li> {sharer.nickname} an order {sharer.order.toString()}  peer.
+        <span class="link-adze-remote-peer"> Adze Them.</span>
+       </li>
+   );
+  }
+ 
 }
 
 export default FeedSection
