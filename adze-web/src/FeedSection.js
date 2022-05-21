@@ -22,6 +22,9 @@ function FeedSection({isActive}) {
      dispatch(updateFeed(manifest));
   }
   
+  if (feedItems.length == 0)  {
+    doFeedUpdate();
+  }
   const lastUpdateText = new Date(currentFeed.meta.timestamp).toLocaleString();
 
   return (
