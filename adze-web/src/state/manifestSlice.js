@@ -95,6 +95,10 @@ export const manifestSlice = createSlice({
         var withoutLink = makeDocListWithoutDoc(state.content.sites, action.payload);
         state.content.sites = withoutLink;
       },
+
+      addLinkDoc : (state, action) => {
+        state.content.sites.push(action.payload);
+      }
   },
   
   extraReducers: (builder) => {
@@ -134,6 +138,6 @@ export const manifestSlice = createSlice({
 
 export const selectManifest = (state) =>  state.manifest
 
-export const { removePeer, removeLink } = manifestSlice.actions
+export const { removePeer, removeLink, addLinkDoc } = manifestSlice.actions
 
 export default manifestSlice.reducer

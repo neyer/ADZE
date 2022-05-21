@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Constants from './Constants.js'
 import { useSelector, useDispatch} from 'react-redux'
 
-import { selectManifest , addPeerByUrl, removePeer } from './state/manifestSlice.js'
+import { selectManifest , addPeerByUrl, removePeer, addLinkDoc } from './state/manifestSlice.js'
 import { selectFeed, updateFeed  } from './state/feedSlice.js'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -57,12 +57,13 @@ function SingleFeedLink({doc}) {
              </div>
             <ProvenanceDescription provenance={doc.provenance}/>
             <div className="column">
-              (feedback will go here)
+              <LinkFeedbackPanel doc={doc}/>
              </div>
          </div>
       </li>
   );
 }
+
 
 class ProvenanceDescription extends React.Component {
 
@@ -182,5 +183,27 @@ function SingleSharerProvenance({sharer, index}) {
    );
  
 }
+
+function LinkFeedbackPanel({doc}) {
+  const dispatch = useDispatch();
+  const addThisDoc = (event) => {
+    // make a copy without the provenance signals
+    // and add in your own timestamp
+    const newDoc = {
+        timestamp: new Date().getTime(),
+        url: doc.url,
+        title: doc.title
+    }
+    dispatch(addLinkDoc(newDoc));
+  }
+  return (
+      <FontAwesomeIcon
+        icon="file-circle-plus"
+        title="Recommend this Document"
+        onClick={addThisDoc}
+      />
+  )
+}
+
 
 export default FeedSection

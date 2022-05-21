@@ -7,9 +7,9 @@ import store from './store.js'
 import { Provider } from 'react-redux'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUserPlus } from '@fortawesome/free-solid-svg-icons'
+import { faUserPlus, faFileCirclePlus } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUserPlus)
+library.add(faUserPlus, faFileCirclePlus)
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
