@@ -54,19 +54,19 @@ export const cleanPeerUrl = (baseUrl) => {
   return baseUrl;
 }
 
-export function makePeerListWithoutPeer(oldPeers, toRemove) {
+// works for links or Peers
+export function makeDocListWithoutDoc(oldDocs, toRemove) {
   // don't start with that default manifest in there.
-  let newPeers = [];
+  let newDocs = [];
   
   console.log("removing "+toRemove);
-  for(let index in oldPeers){
-    var thisPeer = oldPeers[index];
-    if (thisPeer.url !== toRemove.url) {
-      console.log("adding peer "+thisPeer.url);
-      newPeers.push(thisPeer);
+  for(let index in oldDocs){
+    var thisDoc = oldDocs[index];
+    if (thisDoc.url !== toRemove.url) {
+      newDocs.push(thisDoc);
     }
   }
-  return newPeers;
+  return newDocs;
 }
 
 export function flattenPeerLinksList(peerManifestCache) {
@@ -122,4 +122,8 @@ export function sortPeerLinksList(linksList) {
     return docB.provenance.sharers.length - docA.provenance.sharers.length;
   });
 }
+
+
+
+//////// links
 

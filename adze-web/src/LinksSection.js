@@ -3,28 +3,31 @@ import React from 'react'
 
 import Constants from './Constants.js'
 
-import { selectManifest , addLinkByUrl } from './state/manifestSlice.js'
+import { selectManifest , addLinkByUrl, removeLink } from './state/manifestSlice.js'
 import { selectCredentials  } from './state/credentialsSlice.js'
 import { useSelector, useDispatch} from 'react-redux'
 
 import { ErrorMessageOrNull, ManifestStatusMessage} from './notifications.js'
 
 
-class SingleLinkElement extends React.Component {
+function SingleLinkElement({link}){
    // upvote adze it to your own list of links
   // gives you the option of following the peer if you aren't already
    // downvote removes it from your feed, adze it to your list of 'no good'
   // links, and gives the option of removing that peer
 
-  render() {
-    const { link } = this.props;
+    const dispatch = useDispatch();
+    
+    const removeThisLink = () => {
+      dispatch(removeLink(link));
+    }
+    
     return (
         <li>
-          <span>&#x274C;</span>
+          <span onClick={removeThisLink}>&#x274C;</span>
           <a href={link.url}> {link.title}</a>
       </li>
     );
-  }
 }
 
 function LinksSection({isActive}) {

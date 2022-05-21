@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit'
 import produce from "immer"
-import { getPeerManifest, hasPeerAlready, cleanUrl, makePeerListWithoutPeer, makeNewManifest } from '../manifestLib.js'
+import { getPeerManifest, hasPeerAlready, cleanUrl, makeDocListWithoutDoc, makeNewManifest } from '../manifestLib.js'
 
 //########################################
 // Defines a Slice managing manifest state. Mutators and helper functions as well.
@@ -51,10 +51,10 @@ export const addLinkByUrl = createAsyncThunk(
   'manifest/addLinkByUrl',
   async (linkAndCreds, thunkAPI) => {
    const linkDesc = await validateLinkFromHub(linkAndCreds.credentials, linkAndCreds.link)
-   return {
+   return  {
      title: linkDesc.title,
      url: linkDesc.url,
-     timestamp_ms: Date.now().getTime(),
+     timestamp_ms: new Date().getTime(),
    }
   }
 )
@@ -87,21 +87,36 @@ export const manifestSlice = createSlice({
 
   reducers: {
       removePeer: (state, action) => {
-        var withoutPeers = makePeerListWithoutPeer(state.content.peers, action.payload);
-        state.content.peers = withoutPeers;
-        console.log(current(state));
+        var withoutPeer = makeDocListWithoutDoc(state.content.peers, action.payload);
+        state.content.peers = withoutPeer;
+      },
+
+      removeLink: (state, action) => {
+        var withoutLink = makeDocListWithoutDoc(state.content.sites, action.payload);
+        state.content.sites = withoutLink;
       },
   },
   
   extraReducers: (builder) => {
     // add Link by url
     builder.addCase(addLinkByUrl.fulfilled, (state, action) =>  {
-    
+    console.log("adding link fulfilled");
      const newState = produce(state, draftState => { 
           draftState.content.sites.push(action.payload);
      });
 
       return newState;
+    });
+
+    builder.addCase(addLinkByUrl.pending, (state, action) =>  {
+      console.log("adding link pending");
+        return state;
+    });
+
+    builder.addCase(addLinkByUrl.rejected, (state, action) =>  {
+      console.log("adding link rejected");
+      console.log(action);
+        return state;
     });
 
     // add Peer by url
@@ -119,6 +134,6 @@ export const manifestSlice = createSlice({
 
 export const selectManifest = (state) =>  state.manifest
 
-export const { removePeer } = manifestSlice.actions
+export const { removePeer, removeLink } = manifestSlice.actions
 
 export default manifestSlice.reducer

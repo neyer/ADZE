@@ -20,7 +20,7 @@ export function ManifestStatusMessage ({credentials}) {
   }
   return (
         <div className="notification is-warning">
-          You'll need to create credentials for an ADZE Hub for others to see your recommendations.
+          You'll need to create credentials for an ADZE Hub for others to see your recommendations. Go to the 'setup' page to do this.
         </div>
     );
 }

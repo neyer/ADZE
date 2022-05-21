@@ -75,7 +75,6 @@ async function updatePeerManifestCache(localManifest, numTimesToFollow) {
 export const updateFeed = createAsyncThunk(
   'feed/update',
    async (manifest, thunkAPI) => {
-    console.log("holy shit bro gonna do it");
    return await updateFeedLinks(manifest)
   }
 )
