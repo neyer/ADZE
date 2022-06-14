@@ -1,3 +1,4 @@
+import React from 'react';
 import Constants from './Constants.js'
 import { selectManifest, uploadToHub } from './state/manifestSlice.js'
 import { selectCredentials, validateCredentials } from './state/credentialsSlice.js'

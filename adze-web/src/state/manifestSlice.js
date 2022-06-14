@@ -55,6 +55,7 @@ export const addLinkByUrl = createAsyncThunk(
      title: linkDesc.title,
      url: linkDesc.url,
      timestamp_ms: new Date().getTime(),
+     tags: linkAndCreds.tags
    }
   }
 )

@@ -36,15 +36,15 @@ async function updatePeerManifestCache(localManifest, numTimesToFollow) {
   var toVisitNext = [];
   var thisPeerOrder = 1;
   // make a plan to visit all the local peers
-  for (var peerNo in localManifest.content.peers) {
-    var peer = localManifest.content.peers[peerNo];
+  for (let peerNo in localManifest.content.peers) {
+    let peer = localManifest.content.peers[peerNo];
     peersSeenSoFar[peer.url] = true;
     toVisit.push(peer);
   }
 
   while (numTimesToFollow > 0) {
-      for (var peerNo in toVisit) {
-        var peer = toVisit[peerNo];
+      for (let peerNo in toVisit) {
+        let peer = toVisit[peerNo];
         var thisPeerManifest = await getPeerManifest(peer.url);
         peersSeenSoFar[peer.url] = true;
         thisPeerManifest.meta.order = thisPeerOrder;
