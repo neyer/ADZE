@@ -26,12 +26,11 @@ function SingleLinkElement({ link }) {
       <span>{link.title}</span>
       <div className='mb-2'><a href={link.url}> {link.url}</a></div>
       <span>Tags: </span>
-      <span class="tag is-info is-light">
-        Interesting
-      </span>
-      <span class="tag ml-2 is-info is-light">
-        Website
-      </span>
+      {link.tags && link.tags.length !== 0 && link.tags.map(tag => (
+        <span class="tag is-info is-light mr-2">
+          {tag}
+        </span>
+      ))}
     </li>
   );
 }
