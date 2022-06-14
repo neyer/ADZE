@@ -139,7 +139,7 @@ class ProvenanceDescription extends React.Component {
     }
 
 
-    return sharerParts.join(", ");;
+    return sharerParts.join(", ");
   }
 
   getFullShareDescription() {

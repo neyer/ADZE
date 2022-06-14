@@ -1,4 +1,5 @@
-import Constants from './Constants.js'
+import React from 'react';
+import Constants from './Constants.js';
 
 import { selectManifest , addPeerByUrl, removePeer } from './state/manifestSlice.js'
 import { useSelector, useDispatch} from 'react-redux'
